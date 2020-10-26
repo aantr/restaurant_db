@@ -8,7 +8,6 @@ from PyQt5.QtWidgets import QApplication, QMainWindow, QTableWidgetItem
 import PyQt5.QtWidgets as QtWidgets
 import PyQt5.QtCore as QtCore
 
-
 class Widget(QMainWindow):
     def __init__(self):
         super().__init__()
