@@ -5,7 +5,7 @@ from PyQt5.QtWidgets import QApplication, QMainWindow, QTableWidgetItem, \
     QTableWidget, QMessageBox, QTabWidget, QWidget, QLayout, QBoxLayout, QFormLayout, QPushButton, QVBoxLayout, \
     QHBoxLayout, QGridLayout
 from custom_dialog import CustomDialog
-from table_data import IngredientData, DishData
+from table_data import *
 import sqlite3
 
 
@@ -25,7 +25,7 @@ class App(QMainWindow):
         self.tab_widget = QTabWidget(self)
         self.tab_widget.resize(self.size())
 
-        self.table_data_types = [IngredientData, DishData]
+        self.table_data_types = [IngredientData, DishData, DishTypeData, DishIngredientData]
         self.table_names = [i.table_name for i in self.table_data_types]
 
         for table_name, table_data_type in zip(self.table_names, self.table_data_types):

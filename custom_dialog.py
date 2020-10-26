@@ -19,7 +19,7 @@ class CustomDialogItem:
     def correct(self):
         try:
             return self.correct_func(self.get_data())
-        except Exception:
+        except ValueError as e:
             return False
 
     def init_widget(self):
@@ -46,11 +46,15 @@ class CustomDialogText(CustomDialogItem):
 
 
 class CustomDialogList(CustomDialogItem):
-    def __init__(self, name, list, correct=None, default=None):
+    def __init__(self, name, list, match=None, correct=None, default=None):
         super().__init__(name, QComboBox, correct, default)
+        print(self.correct_func(1))
         self.list = list
+        self.match = match
 
     def get_data(self):
+        if self.match is not None:
+            return self.match[self.widget.currentIndex()]
         return self.widget.currentText()
 
     def init_widget(self):
