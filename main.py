@@ -52,12 +52,6 @@ class App(QMainWindow):
                 i.clicked.connect(self.add_arguments(j, table_data))
             self.table_update(table_data)
 
-        # genre_data = GenreData(self.table_genre, self.cur)
-        # for i, j in zip([self.genre_add, self.genre_edit, self.genre_delete],
-        #                 [self.table_add, self.table_edit, self.table_delete]):
-        #     i.clicked.connect(self.add_arguments(j, genre_data))
-        # self.table_update(genre_data)
-
     def table_add_clicked(self, table_data):
         table_data.widget.clearSelection()
         w = CustomDialog(self, *table_data.dialog_items(),

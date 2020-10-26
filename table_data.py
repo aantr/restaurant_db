@@ -28,14 +28,16 @@ class BaseRestaurantTableData(TableData):
 
     def __init__(self, widget, cur: sqlite3.Cursor):
         super().__init__(widget, cur)
+        self.exclude_cols = 1
+        self.replace_cols = {}
 
-    def update(self, replace=()):
+    def update(self):
         self.cur.execute(f'select * from {self.table_name}')
         col_names = list(map(lambda x: x[0], self.cur.description))
         que = f'''select {', '.join([f'{self.table_name}.{i.lower()}'
                                      for i in col_names])} from {self.table_name}'''
-        for i in replace:
-            old_col, new_col, table, table_col, replace_col = map(str.lower, i)
+        for k, v in self.replace_cols.items():
+            old_col, new_col, table, table_col, replace_col = map(str.lower, [k] + list(v))
             que = que.replace(f'{self.table_name}.{old_col}',
                               f'{table}.{table_col} as {new_col}')
             que += f''' left join {table} on {table}.{replace_col} = 
@@ -57,21 +59,23 @@ class BaseRestaurantTableData(TableData):
     def add(self, res):  # res: [field1, field2]
         self.cur.execute(f'select * from {self.table_name}')
         col_names = list(map(lambda x: x[0], self.cur.description))
-        return f'''insert into {self.table_name}({', '.join(col_names[1:])})
+        que = f'''insert into {self.table_name}({', '.join(col_names[self.exclude_cols:])})
                                      values({', '.join([f'"{i}"' for i in res])})'''
+        print(que)
+        return que
 
     def dialog_items(self, row):  # row: [id, field1, field2]
         pass
 
     def generate_dialog(self, items_conditions, row=None):
+        exclude_cols = self.exclude_cols
         self.cur.execute(f'select * from {self.table_name}')
-        col_names = list(map(lambda x: x[0], self.cur.description))[1:]
+        col_names = list(map(lambda x: x[0], self.cur.description))[exclude_cols:]
         if row is None:
             row = [None] * len(col_names)
         else:
-            row = row[1:]
+            row = row[exclude_cols:]
         if len(items_conditions) != len(col_names) or len(row) != len(col_names):
-            print(row, col_names)
             raise IndexError('Length does not match length of items')
         items = []
         for i, j in enumerate(items_conditions):
@@ -83,9 +87,11 @@ class BaseRestaurantTableData(TableData):
                 else:
                     new_j.append(elem)
             j = new_j
-            items.append(j[0](col_names[i].capitalize(), *j[1:],
+            label = col_names[i].lower()
+            if label in self.replace_cols:
+                label = self.replace_cols[label][0]
+            items.append(j[0](label.capitalize(), *j[1:],
                               default=row[i]))
-
         return items
 
 
@@ -111,10 +117,10 @@ class DishData(BaseRestaurantTableData):
 
     def __init__(self, widget, cur: sqlite3.Cursor):
         super().__init__(widget, cur)
+        self.replace_cols = {'typeid': ('type', 'dishtype', 'title', 'id')}
 
     def update(self, replace=()):
-        return super().update((
-            ('typeid', 'type', 'dishtype', 'title', 'id'),))
+        return super().update()
 
     def dialog_items(self, row=None):
         items = self.generate_dialog(
@@ -146,8 +152,10 @@ class DishIngredientData(BaseRestaurantTableData):
 
     def __init__(self, widget, cur: sqlite3.Cursor):
         super().__init__(widget, cur)
+        self.replace_cols = {'dishid': ('dish', 'dish', 'title', 'id'),
+                             'ingredientid': ('ingredient', 'ingredient', 'title', 'id')}
 
-    def update(self, replace=()):
+    def update(self):
         return super().update()
 
     def dialog_items(self, row=None):

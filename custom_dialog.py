@@ -48,7 +48,6 @@ class CustomDialogText(CustomDialogItem):
 class CustomDialogList(CustomDialogItem):
     def __init__(self, name, list, match=None, correct=None, default=None):
         super().__init__(name, QComboBox, correct, default)
-        print(self.correct_func(1))
         self.list = list
         self.match = match
 
