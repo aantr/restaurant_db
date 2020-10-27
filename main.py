@@ -1,6 +1,6 @@
 import sys
 from PyQt5 import uic
-from PyQt5.QtCore import Qt
+from PyQt5.QtCore import Qt, QEvent
 from PyQt5.QtWidgets import QApplication, QMainWindow, QTableWidgetItem, \
     QTableWidget, QMessageBox, QTabWidget, QWidget, QLayout, QBoxLayout, QFormLayout, QPushButton, QVBoxLayout, \
     QHBoxLayout, QGridLayout
@@ -22,11 +22,19 @@ class App(QMainWindow):
         self.con = sqlite3.connect('restaurant_db.sqlite')
         self.cur = self.con.cursor()
 
+        self.cur.execute('''select name from sqlite_master where type='table' ''')
+        table_names_parse = list(map(lambda x: x[0], self.cur.fetchall()[1:]))
+        parse_lower = list(map(str.lower, table_names_parse))
+
         self.tab_widget = QTabWidget(self)
         self.tab_widget.resize(self.size())
 
-        self.table_data_types = [IngredientData, DishData, DishTypeData, DishIngredientData]
+        self.table_data_types = [DishData, IngredientData, DishTypeData, DishIngredientData,
+                                 CookData, WaiterData, OrderData, OrderDishData]
         self.table_names = [i.table_name for i in self.table_data_types]
+        for i, j in enumerate(self.table_names.copy()):
+            if j.lower() in parse_lower:
+                self.table_names[i] = table_names_parse[parse_lower.index(j)]
 
         for table_name, table_data_type in zip(self.table_names, self.table_data_types):
             exec(f'self.{table_name} = QTableWidget(self)')
@@ -44,12 +52,17 @@ class App(QMainWindow):
             layout.addWidget(btn_table_delete, 0, 2)
             layout.addWidget(QWidget(), 0, n_cols - 1)
             tab.setLayout(layout)
-            self.tab_widget.addTab(tab, table_name.capitalize())
+            self.tab_widget.addTab(tab, table_name)
 
             table_data = table_data_type(current_table, self.cur)
             for i, j in zip([btn_table_add, btn_table_edit, btn_table_delete],
-                            [self.table_add_clicked, self.table_edit_clicked, self.table_delete_clicked]):
+                            [self.table_add_clicked, self.table_edit_clicked,
+                             self.table_delete_clicked]):
                 i.clicked.connect(self.add_arguments(j, table_data))
+
+            current_table.doubleClicked.connect(self.add_arguments(
+                self.table_edit_clicked, table_data))
+
             self.table_update(table_data)
 
     def table_add_clicked(self, table_data):
@@ -65,6 +78,8 @@ class App(QMainWindow):
     def table_edit_clicked(self, table_data):
         rows = self.get_selected_rows(table_data.widget)
         if not rows:
+            QMessageBox.information(self, 'Information',
+                                    f'No selected rows')
             return
         i, row = rows[0]
         table_data.widget.selectRow(i)
@@ -73,7 +88,6 @@ class App(QMainWindow):
         res = w.result()
         if res:
             res.insert(0, row[0])
-            print(table_data.edit(res))
             self.cur.execute(table_data.edit(res))
             self.con.commit()
         self.table_update(table_data)
@@ -81,6 +95,8 @@ class App(QMainWindow):
     def table_delete_clicked(self, table_data):
         rows = self.get_selected_rows(table_data.widget)
         if not rows:
+            QMessageBox.information(self, 'Information',
+                                    f'No selected rows')
             return
         rows = list(map(lambda x: x[1], rows))
         ans = QMessageBox.question(

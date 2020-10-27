@@ -1,6 +1,6 @@
-from PyQt5.QtCore import Qt
+from PyQt5.QtCore import Qt, QDateTime
 from PyQt5.QtWidgets import QWidget, QLineEdit, QComboBox, QDialog, \
-    QPushButton, QLabel, QMessageBox
+    QPushButton, QLabel, QMessageBox, QDateTimeEdit
 
 
 class CustomDialogItem:
@@ -37,12 +37,12 @@ class CustomDialogText(CustomDialogItem):
         super().__init__(name, QLineEdit, correct, default)
 
     def get_data(self):
-        return self.widget.text()
+        return self.widget.text().strip()
 
     def set_default_data(self, data):
         if data is None:
             return
-        self.widget.setText(data)
+        self.widget.setText(data.strip())
 
 
 class CustomDialogList(CustomDialogItem):
@@ -57,12 +57,30 @@ class CustomDialogList(CustomDialogItem):
         return self.widget.currentText()
 
     def init_widget(self):
-        self.widget.addItems(self.list)
+        self.widget.addItems(map(str, self.list))
 
     def set_default_data(self, data):
         if data is None:
             return
         self.widget.setCurrentText(data)
+
+
+class CustomDialogDateTime(CustomDialogItem):
+    def __init__(self, name, correct=None, default=None):
+        super().__init__(name, QDateTimeEdit, correct, default)
+
+    def init_widget(self):
+        self.widget.setDateTime(QDateTime.currentDateTime())
+
+    def get_data(self):
+        self.widget: QDateTimeEdit
+        return self.widget.dateTime().toString(self.widget.displayFormat())
+
+    def set_default_data(self, data):
+        if data is None:
+            return
+        self.widget: QDateTimeEdit
+        self.widget.setDateTime(QDateTime.fromString(data, self.widget.displayFormat()))
 
 
 class CustomDialog(QDialog):
@@ -79,8 +97,8 @@ class CustomDialog(QDialog):
         widget_width = 200
         widget_height = 20
 
-        self.setGeometry(500, 500, indent * 2 + widget_width + label_indent + right_indent,
-                         len(items) * items_dist + indent + bottom_indent)
+        self.resize(indent * 2 + widget_width + label_indent + right_indent,
+                    len(items) * items_dist + indent + bottom_indent)
         self.setFixedSize(self.width(), self.height())
 
         self.items = items
@@ -91,15 +109,15 @@ class CustomDialog(QDialog):
             item.widget.setGeometry(indent + label_indent, indent + items_dist * j,
                                     widget_width, widget_height)
 
-        self.cancelButton = QPushButton('Cancel', self)
-        self.cancelButton.move(self.width() - indent - 70,
-                               self.height() - indent - 25)
-        self.cancelButton.clicked.connect(self.canceled)
-
         self.pushButton = QPushButton('Ok', self)
         self.pushButton.move(self.width() - indent - 150,
                              self.height() - indent - 25)
         self.pushButton.clicked.connect(self.clicked)
+
+        self.cancelButton = QPushButton('Cancel', self)
+        self.cancelButton.move(self.width() - indent - 70,
+                               self.height() - indent - 25)
+        self.cancelButton.clicked.connect(self.canceled)
 
         self.info = QLabel('', self)
         self.info.setGeometry(indent, self.height() - indent - 25,
@@ -111,7 +129,7 @@ class CustomDialog(QDialog):
             if i.correct():
                 ...
             else:
-                QMessageBox.information(self, 'Incorrect data',
+                QMessageBox.information(self, 'Information',
                                         f'Incorrect data in \'{i.name}\'')
                 # self.info.setText(f'Incorrect data in \'{i.name}\'')
                 break

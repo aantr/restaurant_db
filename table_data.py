@@ -1,4 +1,5 @@
-from custom_dialog import CustomDialogText, CustomDialogList
+from custom_dialog import CustomDialogText, CustomDialogList, \
+    CustomDialogDateTime
 import sqlite3
 
 
@@ -61,7 +62,6 @@ class BaseRestaurantTableData(TableData):
         col_names = list(map(lambda x: x[0], self.cur.description))
         que = f'''insert into {self.table_name}({', '.join(col_names[self.exclude_cols:])})
                                      values({', '.join([f'"{i}"' for i in res])})'''
-        print(que)
         return que
 
     def dialog_items(self, row):  # row: [id, field1, field2]
@@ -106,7 +106,7 @@ class IngredientData(BaseRestaurantTableData):
 
     def dialog_items(self, row=None):
         items = self.generate_dialog(
-            [(CustomDialogText, lambda x: x != ''),
+            [(CustomDialogText, lambda x: x),
              (CustomDialogText, lambda x: int(x) > 0)],
             row=row)
         return items
@@ -124,7 +124,7 @@ class DishData(BaseRestaurantTableData):
 
     def dialog_items(self, row=None):
         items = self.generate_dialog(
-            [(CustomDialogText, lambda x: x != ''),
+            [(CustomDialogText, lambda x: x),
              (CustomDialogText, lambda x: int(x) > 0),
              (CustomDialogList, ('dishtype', 'title'), ('dishtype', 'id'), None)],
             row=row)
@@ -142,7 +142,7 @@ class DishTypeData(BaseRestaurantTableData):
 
     def dialog_items(self, row=None):
         items = self.generate_dialog(
-            [(CustomDialogText, lambda x: x != '')],
+            [(CustomDialogText, lambda x: x)],
             row=row)
         return items
 
@@ -163,5 +163,76 @@ class DishIngredientData(BaseRestaurantTableData):
             [(CustomDialogList, ('dish', 'title'), ('dish', 'id'), None),
              (CustomDialogList, ('ingredient', 'title'), ('ingredient', 'id'), None),
              (CustomDialogText, lambda x: float(x) > 0)],
+            row=row)
+        return items
+
+
+class CookData(BaseRestaurantTableData):
+    table_name = 'cook'
+
+    def __init__(self, widget, cur: sqlite3.Cursor):
+        super().__init__(widget, cur)
+
+    def update(self):
+        return super().update()
+
+    def dialog_items(self, row=None):
+        items = self.generate_dialog(
+            [(CustomDialogText, lambda x: x)],
+            row=row)
+        return items
+
+
+class WaiterData(BaseRestaurantTableData):
+    table_name = 'waiter'
+
+    def __init__(self, widget, cur: sqlite3.Cursor):
+        super().__init__(widget, cur)
+
+    def update(self):
+        return super().update()
+
+    def dialog_items(self, row=None):
+        items = self.generate_dialog(
+            [(CustomDialogText, lambda x: x)],
+            row=row)
+        return items
+
+
+class OrderData(BaseRestaurantTableData):
+    table_name = 'order_'
+
+    def __init__(self, widget, cur: sqlite3.Cursor):
+        super().__init__(widget, cur)
+        self.replace_cols = {'waiterid': ('waiter', 'waiter', 'name', 'id')}
+
+    def update(self):
+        return super().update()
+
+    def dialog_items(self, row=None):
+        items = self.generate_dialog(
+            [(CustomDialogList, ('waiter', 'name'), ('waiter', 'id'), None),
+             (CustomDialogDateTime, None)],
+            row=row)
+        return items
+
+
+class OrderDishData(BaseRestaurantTableData):
+    table_name = 'orderdish'
+
+    def __init__(self, widget, cur: sqlite3.Cursor):
+        super().__init__(widget, cur)
+        self.replace_cols = {'orderid': ('order_', 'order_', 'datetime', 'id'),
+                             'cookid': ('cook', 'cook', 'name', 'id'),
+                             'dishid': ('dish', 'dish', 'title', 'id')}
+
+    def update(self):
+        return super().update()
+
+    def dialog_items(self, row=None):
+        items = self.generate_dialog(
+            [(CustomDialogList, ('order_', 'datetime'), ('order_', 'id'), None),
+             (CustomDialogList, ('cook', 'name'), ('cook', 'id'), None),
+             (CustomDialogList, ('dish', 'title'), ('dish', 'id'), None)],
             row=row)
         return items
