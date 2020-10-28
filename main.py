@@ -83,7 +83,11 @@ class ReportsWidget(QWidget):
         self.init_ui()
 
     def init_ui(self):
-        ...
+        # пример кнопки, можно удалить
+        self.btn = QPushButton('1212', self)
+        self.btn.move(100, 100)
+
+        # сделать, например, график заказов за опр. время
 
 
 def except_hook(cls, exception, traceback):

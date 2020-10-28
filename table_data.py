@@ -4,32 +4,45 @@ import sqlite3
 
 
 class TableData:
+    """Used for working with table in database
+    that class use CustomDialog for input data"""
+
     def __init__(self, widget, cur: sqlite3.Cursor):
         self.widget = widget
         self.cur = cur
 
     def update(self):
+        """Returns str sqlite request for update table"""
         pass
 
     def delete(self, rows):
+        """Returns str sqlite request for delete rows in table"""
         pass
 
     def edit(self, res):
+        """Returns str sqlite request for edit rows in table"""
         pass
 
     def add(self, res):
+        """Returns str sqlite request for add row in table"""
         pass
 
     def dialog_items(self, row):
+        """Returns list of CustomDialogItem"""
         pass
 
 
 class BaseRestaurantTableData(TableData):
+    """Use table name to work with table"""
     table_name = None
 
     def __init__(self, widget, cur: sqlite3.Cursor):
         super().__init__(widget, cur)
+
+        # Don`t use the column "Id"
         self.exclude_cols = 1
+
+        # Replace real column names and data
         self.replace_cols = {}
 
     def update(self):
@@ -67,7 +80,8 @@ class BaseRestaurantTableData(TableData):
     def dialog_items(self, row):  # row: [id, field1, field2]
         pass
 
-    def generate_dialog(self, items_conditions, row=None):
+    def generate_dialog_items(self, items_conditions, row=None):
+        """Returns list of CustomDialogItem"""
         exclude_cols = self.exclude_cols
         self.cur.execute(f'select * from {self.table_name}')
         col_names = list(map(lambda x: x[0], self.cur.description))[exclude_cols:]
@@ -105,7 +119,7 @@ class IngredientData(BaseRestaurantTableData):
         return super().update()
 
     def dialog_items(self, row=None):
-        items = self.generate_dialog(
+        items = self.generate_dialog_items(
             [(CustomDialogText, lambda x: x),
              (CustomDialogText, lambda x: int(x) > 0)],
             row=row)
@@ -123,7 +137,7 @@ class DishData(BaseRestaurantTableData):
         return super().update()
 
     def dialog_items(self, row=None):
-        items = self.generate_dialog(
+        items = self.generate_dialog_items(
             [(CustomDialogText, lambda x: x),
              (CustomDialogText, lambda x: int(x) > 0),
              (CustomDialogList, ('dishtype', 'title'), ('dishtype', 'id'), None)],
@@ -141,7 +155,7 @@ class DishTypeData(BaseRestaurantTableData):
         return super().update()
 
     def dialog_items(self, row=None):
-        items = self.generate_dialog(
+        items = self.generate_dialog_items(
             [(CustomDialogText, lambda x: x)],
             row=row)
         return items
@@ -159,7 +173,7 @@ class DishIngredientData(BaseRestaurantTableData):
         return super().update()
 
     def dialog_items(self, row=None):
-        items = self.generate_dialog(
+        items = self.generate_dialog_items(
             [(CustomDialogList, ('dish', 'title'), ('dish', 'id'), None),
              (CustomDialogList, ('ingredient', 'title'), ('ingredient', 'id'), None),
              (CustomDialogText, lambda x: float(x) > 0)],
@@ -177,7 +191,7 @@ class CookData(BaseRestaurantTableData):
         return super().update()
 
     def dialog_items(self, row=None):
-        items = self.generate_dialog(
+        items = self.generate_dialog_items(
             [(CustomDialogText, lambda x: x)],
             row=row)
         return items
@@ -193,7 +207,7 @@ class WaiterData(BaseRestaurantTableData):
         return super().update()
 
     def dialog_items(self, row=None):
-        items = self.generate_dialog(
+        items = self.generate_dialog_items(
             [(CustomDialogText, lambda x: x)],
             row=row)
         return items
@@ -210,7 +224,7 @@ class OrderData(BaseRestaurantTableData):
         return super().update()
 
     def dialog_items(self, row=None):
-        items = self.generate_dialog(
+        items = self.generate_dialog_items(
             [(CustomDialogList, ('waiter', 'name'), ('waiter', 'id'), None),
              (CustomDialogDateTime, None)],
             row=row)
@@ -230,7 +244,7 @@ class OrderDishData(BaseRestaurantTableData):
         return super().update()
 
     def dialog_items(self, row=None):
-        items = self.generate_dialog(
+        items = self.generate_dialog_items(
             [(CustomDialogList, ('order_', 'datetime'), ('order_', 'id'), None),
              (CustomDialogList, ('cook', 'name'), ('cook', 'id'), None),
              (CustomDialogList, ('dish', 'title'), ('dish', 'id'), None)],
