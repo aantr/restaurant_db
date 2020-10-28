@@ -1,64 +1,114 @@
-from PyQt5.QtCore import QSize
-from PyQt5.QtWidgets import *
 import sys
-from PIL.ImageQt import ImageQt
-from PyQt5 import uic
-from PyQt5.QtGui import QPixmap
-from PyQt5.QtWidgets import QApplication, QMainWindow, QTableWidgetItem
-import PyQt5.QtWidgets as QtWidgets
-import PyQt5.QtCore as QtCore
+from PyQt5.QtGui import *
+from PyQt5.QtCore import *
+from PyQt5.QtWidgets import *
 
-class Widget(QMainWindow):
+
+class Window(QMainWindow):
     def __init__(self):
         super().__init__()
-        self.init()
+        self.title = "App"
+        self.top = 100
+        self.left = 100
+        self.width = 680
+        self.height = 500
+        self.InitUI()
 
-    def init(self):
-        self.setWindowTitle('Title')
-        self.resize(500, 300)
-        self.tabs = QTabWidget(self)
-        self.tabs.resize(400, 200)
+    def InitUI(self):
+        self.setWindowTitle(self.title)
+        self.setGeometry(self.top, self.left, self.width, self.height)
 
-        self.tab1 = QWidget()
-        layout = QFormLayout()
-        layout.addRow("Name", QLineEdit())
-        layout.addRow("Address", QLineEdit())
-        self.tab1.setLayout(layout)
+        buttonWindow1 = QPushButton('Window1', self)
+        buttonWindow1.move(100, 100)
+        buttonWindow1.clicked.connect(self.buttonWindow1_onClick)
+        self.lineEdit1 = QLineEdit("Type here what you want to transfer for [Window1].", self)
+        self.lineEdit1.setGeometry(250, 100, 400, 30)
 
-        self.tab2 = QWidget()
-        layout = QFormLayout()
-        layout.addRow("Name", QLineEdit())
-        layout.addRow("Address", QLineEdit())
+        buttonWindow2 = QPushButton('Window2', self)
+        buttonWindow2.move(100, 200)
+        buttonWindow2.clicked.connect(self.buttonWindow2_onClick)
+        self.lineEdit2 = QLineEdit("Type here what you want to transfer for [Window2].", self)
+        self.lineEdit2.setGeometry(250, 200, 400, 30)
+        self.show()
 
-        self.tabs.addTab(self.tab1, '1')
-        self.tabs.addTab(self.tab2, '2')
+    @pyqtSlot()
+    def buttonWindow1_onClick(self):
+        self.statusBar().showMessage("Switched to window 1")
+        self.cams = Window1(self.lineEdit1.text())
+        self.cams.show()
+        self.close()
 
-
-    def clicked(self):
-        ...
-
-    def apply_image(self, label, image):
-        label.setPixmap(QPixmap.fromImage(ImageQt.ImageQt(image)))
-
-    def fill_table(self, title=(), data=()):
-        self.table.clear()
-        self.table.setColumnCount(len(title))
-        self.table.setHorizontalHeaderLabels(title)
-        self.table.setRowCount(len(data))
-        for i, row in enumerate(data):
-            for j in range(len(row)):
-                elem = row[j]
-                item = QTableWidgetItem(str(elem))
-                self.table.setItem(i, j, item)
+    @pyqtSlot()
+    def buttonWindow2_onClick(self):
+        self.statusBar().showMessage("Switched to window 2")
+        self.cams = Window2(self.lineEdit2.text())
+        self.cams.show()
+        self.close()
 
 
-def except_hook(cls, exception, traceback):
-    sys.__excepthook__(cls, exception, traceback)
+class Window1(QDialog):
+    def __init__(self, value, parent=None):
+        super().__init__(parent)
+        self.setWindowTitle('Window1')
+        self.setWindowIcon(self.style().standardIcon(QStyle.SP_FileDialogInfoView))
+
+        label1 = QLabel(value)
+        self.button = QPushButton()
+        self.button.setSizePolicy(QSizePolicy.Minimum, QSizePolicy.Expanding)
+        self.button.setIcon(self.style().standardIcon(QStyle.SP_ArrowLeft))
+        self.button.setIconSize(QSize(200, 200))
+
+        layoutV = QVBoxLayout()
+        self.pushButton = QPushButton(self)
+        self.pushButton.setStyleSheet('background-color: rgb(0,0,255); color: #fff')
+        self.pushButton.setText('Click me!')
+        self.pushButton.clicked.connect(self.goMainWindow)
+        layoutV.addWidget(self.pushButton)
+
+        layoutH = QHBoxLayout()
+        layoutH.addWidget(label1)
+        layoutH.addWidget(self.button)
+        layoutV.addLayout(layoutH)
+        self.setLayout(layoutV)
+
+    def goMainWindow(self):
+        self.cams = Window()
+        self.cams.show()
+        self.close()
+
+
+class Window2(QDialog):
+    def __init__(self, value, parent=None):
+        super().__init__(parent)
+        self.setWindowTitle('Window2')
+        self.setWindowIcon(self.style().standardIcon(QStyle.SP_FileDialogInfoView))
+
+        label1 = QLabel(value)
+        self.button = QPushButton()
+        self.button.setSizePolicy(QSizePolicy.Minimum, QSizePolicy.Expanding)
+        self.button.setIcon(self.style().standardIcon(QStyle.SP_ArrowLeft))
+        self.button.setIconSize(QSize(200, 200))
+
+        layoutV = QVBoxLayout()
+        self.pushButton = QPushButton(self)
+        self.pushButton.setStyleSheet('background-color: rgb(0,0,255); color: #fff')
+        self.pushButton.setText('Click me!')
+        self.pushButton.clicked.connect(self.goMainWindow)
+        layoutV.addWidget(self.pushButton)
+
+        layoutH = QHBoxLayout()
+        layoutH.addWidget(label1)
+        layoutH.addWidget(self.button)
+        layoutV.addLayout(layoutH)
+        self.setLayout(layoutV)
+
+    def goMainWindow(self):
+        self.cams = Window()
+        self.cams.show()
+        self.close()
 
 
 if __name__ == '__main__':
-    sys.excepthook = except_hook
     app = QApplication(sys.argv)
-    ex = Widget()
-    ex.show()
-    sys.exit(app.exec())
+    ex = Window()
+    sys.exit(app.exec_())
