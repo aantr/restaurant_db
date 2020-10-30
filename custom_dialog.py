@@ -1,6 +1,7 @@
 from PyQt5.QtCore import Qt, QDateTime
+from PyQt5.QtGui import QColor, QPixmap, QIcon
 from PyQt5.QtWidgets import QWidget, QLineEdit, QComboBox, QDialog, \
-    QPushButton, QLabel, QMessageBox, QDateTimeEdit
+    QPushButton, QLabel, QMessageBox, QDateTimeEdit, QGraphicsDropShadowEffect
 
 
 class CustomDialogItem:

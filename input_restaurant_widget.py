@@ -1,15 +1,18 @@
 from PyQt5.QtCore import Qt
-from PyQt5.QtWidgets import QTableWidgetItem, \
-    QTableWidget, QMessageBox, QTabWidget, QWidget, QPushButton, QGridLayout
-from custom_dialog import CustomDialog
+from PyQt5 import uic
+from PyQt5.QtWidgets import QMessageBox, QWidget, QPushButton, QGridLayout, QTableWidget
 from table_data import DishData, IngredientData, DishTypeData, DishIngredientData, \
     CookData, WaiterData, OrderData, OrderDishData
+from custom_dialog import CustomDialog
 import sqlite3
 
+from utils import add_arguments, fill_table, get_selected_rows, add_shadow
 
-class InputRestaurantWidget(QWidget):
-    def __init__(self, parent=None):
-        super().__init__(parent)
+
+class InputRestaurantWidgetBackButton(QWidget):
+    def __init__(self, main_menu_widget):
+        super().__init__()
+        self.main_menu_widget = main_menu_widget
 
         self.con = sqlite3.connect('restaurant_db.sqlite')
         self.cur = self.con.cursor()
@@ -17,7 +20,14 @@ class InputRestaurantWidget(QWidget):
         self.init_ui()
 
     def init_ui(self):
-        self.tab_widget = QTabWidget(self)
+        uic.loadUi('input_restaurant.ui', self)
+        self.setFixedSize(self.size())
+
+        # Turn off frame
+        self.setWindowFlag(Qt.FramelessWindowHint)
+        self.setAttribute(Qt.WA_TranslucentBackground)
+        # Drop shadow
+        self.shadow = add_shadow(self, self.frame)
 
         self.cur.execute('''select name from sqlite_master where type='table' ''')
         # Parse all table names in database
@@ -36,7 +46,7 @@ class InputRestaurantWidget(QWidget):
 
         for table_name, table_data_type in zip(self.table_names, self.table_data_types):
             exec(f'self.{table_name} = QTableWidget(self)')
-            current_table = eval(f'self.{table_name}')
+            current_table: QTableWidget = eval(f'self.{table_name}')
             btn_table_add = QPushButton('Add item', self)
             btn_table_edit = QPushButton('Edit item', self)
             btn_table_delete = QPushButton('Delete items', self)
@@ -58,17 +68,20 @@ class InputRestaurantWidget(QWidget):
             for i, j in zip([btn_table_add, btn_table_edit, btn_table_delete],
                             [self.table_add_clicked, self.table_edit_clicked,
                              self.table_delete_clicked]):
-                i.clicked.connect(self.add_arguments(j, table_data))
+                i.clicked.connect(add_arguments(j, table_data))
 
             # Edit if double clicked on item
-            current_table.doubleClicked.connect(self.add_arguments(
+            current_table.doubleClicked.connect(add_arguments(
                 self.table_edit_clicked, table_data))
 
             self.table_update(table_data)
 
-    def resize(self, *args):
-        super().resize(*args)
-        self.tab_widget.resize(*args)
+    def get_connects(self):
+        return [(self.btn_back.clicked, self.main_menu_widget())]
+
+    def close(self):
+        super().close()
+        self.con.close()
 
     def table_add_clicked(self, table_data):
         """Add a row in table with TableData"""
@@ -83,7 +96,7 @@ class InputRestaurantWidget(QWidget):
 
     def table_edit_clicked(self, table_data):
         """Edits selected rows in table with TableData"""
-        rows = self.get_selected_rows(table_data.widget)
+        rows = get_selected_rows(table_data.widget)
         if not rows:
             # If rows not selected
             QMessageBox.information(self, 'Information',
@@ -102,7 +115,7 @@ class InputRestaurantWidget(QWidget):
 
     def table_delete_clicked(self, table_data):
         """Deletes selected rows in table with TableData"""
-        rows = self.get_selected_rows(table_data.widget)
+        rows = get_selected_rows(table_data.widget)
         if not rows:
             # If rows not selected
             QMessageBox.information(self, 'Information',
@@ -121,37 +134,4 @@ class InputRestaurantWidget(QWidget):
         """Fill table with TableData"""
         data = self.cur.execute(table_data.update()).fetchall()
         head = list(map(lambda x: x[0].capitalize(), self.cur.description))
-        self.fill_table(table_data.widget, head, data)
-
-    @staticmethod
-    def add_arguments(f, *args):
-        def decorated():
-            return f(*args)
-
-        return decorated
-
-    @staticmethod
-    def get_selected_rows(table: QTableWidget):
-        """Returns selected rows in QTableWidget in format:
-        [(3, [el1, el2, el3]),
-        (4, [el1, el2, el3]),
-        (5, [el1, el2, el3])
-        ...]"""
-        n_rows = set([i.row() for i in table.selectedItems()])
-        rows = [(i, [table.item(i, j).text() for
-                     j in range(table.columnCount())]) for i in n_rows]
-        return rows
-
-    @staticmethod
-    def fill_table(table, title=(), data=()):
-        """Clear table and fill with title and data"""
-        table.clear()
-        table.setColumnCount(len(title))
-        table.setHorizontalHeaderLabels(title)
-        table.setRowCount(len(data))
-        for i, row in enumerate(data):
-            for j in range(len(row)):
-                elem = row[j]
-                item = QTableWidgetItem(str(elem))
-                item.setFlags(Qt.ItemIsSelectable | Qt.ItemIsEnabled)
-                table.setItem(i, j, item)
+        fill_table(table_data.widget, head, data)
