@@ -1,0 +1,186 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>Form</class>
+ <widget class="QWidget" name="Form">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>900</width>
+    <height>540</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Form</string>
+  </property>
+  <property name="styleSheet">
+   <string notr="true"/>
+  </property>
+  <widget class="QFrame" name="frame">
+   <property name="geometry">
+    <rect>
+     <x>15</x>
+     <y>15</y>
+     <width>871</width>
+     <height>511</height>
+    </rect>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">QFrame{
+border-radius: 5px;
+background: #fff;
+}
+
+QWidget{
+font-family: &quot;Segoe UI&quot;;
+}
+
+/*
+QWidget{
+font-family: &quot;Segoe UI&quot;;
+background: #f2f7f5;
+color: #00473e;
+}
+
+QHeaderView, QHeaderView::section {
+    background-color: #f2f7f5;
+}
+
+QTableWidget QTableCornerButton::section {
+    background: #f2f7f5;
+    border: 2px outset #f2f7f5;
+}
+
+QTableWidget::item {
+    padding: 1px 4px;
+    border-radius: 4px;
+}
+
+QTableWidget::item::selected {
+    background: #f9bc60;
+}
+
+QTableWidget::pane {
+    border-top: 2px solid none;
+}
+
+QTabWidget::pane {
+    border-top: 2px solid none;
+}
+
+QTabBar::tab {
+	font-family: &quot;Segoe UI&quot;;
+    background: #f9bc60;
+    spacing: 2px;
+    min-width: 50px;
+    padding: 2px;
+border: 2px solid;
+border-top-left-radius: 4px;
+border-top-right-radius: 4px;
+}
+
+QTabBar::tab:selected, QTabBar::tab:hover {
+    background: #ea9e1b;
+}
+
+QTabBar::tab:selected {
+border-color: #9B9B9B;
+border-bottom-color: #C2C7CB;
+}
+
+QTabBar::tab:pressed {
+background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:0, y2:1, stop:0 rgb(156,158,189), stop:1 rgb(136,138,169));
+}
+
+QTabBar::tab:!selected {
+    margin-top: 3px;
+}
+
+QPushButton{
+background-color: #f9bc60;
+font-family: &quot;segoe ui&quot;;
+font-size: 12px;
+font-weight: bold;
+font-style: italic;
+border-radius: 3px;
+min-width: 40px;
+min-height: 25px;
+padding: 0px 12px;
+}
+
+QPushButton:hover{
+background-color: #ea9e1b;
+}
+
+QPushButton:pressed{
+background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:0, y2:1, stop:0 #f9bc60, stop:1 #ea9e1b);
+}*/</string>
+   </property>
+   <property name="frameShape">
+    <enum>QFrame::StyledPanel</enum>
+   </property>
+   <property name="frameShadow">
+    <enum>QFrame::Raised</enum>
+   </property>
+   <widget class="QTabWidget" name="tab_widget">
+    <property name="geometry">
+     <rect>
+      <x>30</x>
+      <y>75</y>
+      <width>811</width>
+      <height>406</height>
+     </rect>
+    </property>
+    <property name="currentIndex">
+     <number>-1</number>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="btn_back">
+    <property name="geometry">
+     <rect>
+      <x>30</x>
+      <y>30</y>
+      <width>75</width>
+      <height>23</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <family>Segoe UI</family>
+      <pointsize>-1</pointsize>
+      <weight>75</weight>
+      <italic>true</italic>
+      <bold>true</bold>
+     </font>
+    </property>
+    <property name="cursor">
+     <cursorShape>PointingHandCursor</cursorShape>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">QPushButton{
+background-color: #CA94D4;
+font-weight: bold;
+font-style: italic;
+color: #fff;
+font-size: 12px;
+border-radius: 3px;
+}
+
+
+QPushButton:hover{
+background-color: #bA84c4;
+}
+
+QPushButton:pressed{
+background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:0, y2:1, stop:0 #CA94D4, stop:1 #bA84c4);
+}</string>
+    </property>
+    <property name="text">
+     <string>Back</string>
+    </property>
+   </widget>
+  </widget>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>
