@@ -1,6 +1,6 @@
 from PyQt5.QtCore import Qt, QPoint
 from PyQt5.QtGui import QColor
-from PyQt5.QtWidgets import QWidget, QGraphicsDropShadowEffect
+from PyQt5.QtWidgets import QWidget, QGraphicsDropShadowEffect, QMessageBox
 
 
 class BaseWindow(QWidget):
@@ -21,6 +21,9 @@ class BaseWindow(QWidget):
         # Frame move
         self.start_pos = None
 
+        self.setStyleSheet('QMessageBox{background: #fff;} '
+                           'QDialog{background: #fff;}')
+
     def mousePressEvent(self, event):
         if event.button() == Qt.LeftButton:
             self.start_pos = event.pos()
@@ -34,6 +37,16 @@ class BaseWindow(QWidget):
     def mouseReleaseEvent(self, event):
         if event.button() == Qt.LeftButton:
             self.start_pos = None
+
+    def keyPressEvent(self, event):
+        if event.key() == Qt.Key_Escape:
+            self.exit()
+
+    def exit(self):
+        ans = QMessageBox.question(self, 'Question', 'Are you sure you want to exit?',
+                                   QMessageBox.Yes, QMessageBox.No)
+        if ans == QMessageBox.Yes:
+            self.close()
 
     def get_window_transition(self):
         pass
