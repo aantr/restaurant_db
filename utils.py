@@ -1,6 +1,5 @@
 from PyQt5.QtCore import Qt
-from PyQt5.QtGui import QColor
-from PyQt5.QtWidgets import QTableWidget, QTableWidgetItem, QGraphicsDropShadowEffect
+from PyQt5.QtWidgets import QTableWidget, QTableWidgetItem
 
 
 def add_arguments(f, *args):
@@ -22,11 +21,11 @@ def get_selected_rows(table: QTableWidget):
     return rows
 
 
-def fill_table(table, title=(), data=()):
+def fill_table(table: QTableWidget, head=(), data=()):
     """Clear table and fill with title and data"""
     table.clear()
-    table.setColumnCount(len(title))
-    table.setHorizontalHeaderLabels(title)
+    table.setColumnCount(len(head))
+    table.setHorizontalHeaderLabels(head)
     table.setRowCount(len(data))
     for i, row in enumerate(data):
         for j in range(len(row)):
@@ -34,12 +33,6 @@ def fill_table(table, title=(), data=()):
             item = QTableWidgetItem(str(elem))
             item.setFlags(Qt.ItemIsSelectable | Qt.ItemIsEnabled)
             table.setItem(i, j, item)
-
-
-def add_shadow(widget, frame):
-    shadow = QGraphicsDropShadowEffect(widget)
-    shadow.setOffset(0, 0)
-    shadow.setBlurRadius(15)
-    shadow.setColor(QColor(0, 0, 0, 100))
-    frame.setGraphicsEffect(shadow)
-    return shadow
+    table.resizeColumnsToContents()
+    for i in range(table.colorCount()):
+        table.setColumnWidth(i, table.columnWidth(i) + 50)

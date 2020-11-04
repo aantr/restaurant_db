@@ -1,6 +1,8 @@
 import sys
 from PyQt5.QtWidgets import QApplication, QMainWindow
-from main_menu_widget import MainMenuWidget
+
+from edit_db_widget import EditDatabaseWidget
+from menu_widget import MenuWidget
 
 
 class App(QMainWindow):
@@ -8,16 +10,18 @@ class App(QMainWindow):
         super().__init__()
 
     def show(self):
-        self.main_menu = MainMenuWidget()
-        self.create_new(None, self.main_menu)()
+        self.widget = EditDatabaseWidget(MenuWidget)
+
+        for event, new_widget in self.widget.get_window_transition():
+            event.connect(self.create_new(self.widget, new_widget))
+        self.widget.show()
 
     def create_new(self, w1, w2):
         def decorated():
-            for i in w2.get_connects():
-                i[0].connect(self.create_new(w2, i[1]))
+            for event, new_widget in w2.get_window_transition():
+                event.connect(self.create_new(w2, new_widget))
             w2.show()
-            if w1:
-                w1.close()
+            w1.close()
 
         return decorated
 

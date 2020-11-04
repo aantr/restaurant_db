@@ -42,20 +42,22 @@ class BaseRestaurantTableData(TableData):
         # Don`t use the column "Id"
         self.exclude_cols = 1
 
-        # Replace real column names and data
+        # Replace real column names and data for better displaying
         self.replace_cols = {}
 
     def update(self):
         self.cur.execute(f'select * from {self.table_name}')
         col_names = list(map(lambda x: x[0], self.cur.description))
+
         que = f'''select {', '.join([f'{self.table_name}.{i.lower()}'
-                                     for i in col_names])} from {self.table_name}'''
+                                     for i in col_names])} from ({self.table_name}'''
         for k, v in self.replace_cols.items():
-            old_col, new_col, table, table_col, replace_col = map(str.lower, [k] + list(v))
+            old_col, new_col, table, table_col, repl_col = map(str.lower, [k] + list(v))
             que = que.replace(f'{self.table_name}.{old_col}',
                               f'{table}.{table_col} as {new_col}')
-            que += f''' left join {table} on {table}.{replace_col} = 
+            que += f''' left join {table} on {table}.{repl_col} = 
                     {self.table_name}.{old_col}'''
+        que += ')'
         return que
 
     def delete(self, rows):  # row: [id, field1, field2]
@@ -73,8 +75,9 @@ class BaseRestaurantTableData(TableData):
     def add(self, res):  # res: [field1, field2]
         self.cur.execute(f'select * from {self.table_name}')
         col_names = list(map(lambda x: x[0], self.cur.description))
-        que = f'''insert into {self.table_name}({', '.join(col_names[self.exclude_cols:])})
-                                     values({', '.join([f'"{i}"' for i in res])})'''
+        que = f'''insert into {self.table_name}
+                ({', '.join(col_names[self.exclude_cols:])})
+                values({', '.join([f'"{i}"' for i in res])})'''
         return que
 
     def dialog_items(self, row):  # row: [id, field1, field2]
@@ -89,7 +92,8 @@ class BaseRestaurantTableData(TableData):
             row = [None] * len(col_names)
         else:
             row = row[exclude_cols:]
-        if len(items_conditions) != len(col_names) or len(row) != len(col_names):
+        if len(items_conditions) != len(col_names) or \
+                len(row) != len(col_names):
             raise IndexError('Length does not match length of items')
         items = []
         for i, j in enumerate(items_conditions):
@@ -114,14 +118,18 @@ class IngredientData(BaseRestaurantTableData):
 
     def __init__(self, widget, cur: sqlite3.Cursor):
         super().__init__(widget, cur)
+        self.replace_cols = {'unitid': ('unit', 'unit', 'title', 'id')}
 
     def update(self, replace=()):
-        return super().update()
+        que = super().update()
+        que += f' order by {self.table_name}.title'
+        return que
 
     def dialog_items(self, row=None):
         items = self.generate_dialog_items(
             [(CustomDialogText, lambda x: x),
-             (CustomDialogText, lambda x: int(x) > 0)],
+             (CustomDialogText, lambda x: float(x) > 0),
+             (CustomDialogList, ('unit', 'title'), ('unit', 'id'), None)],
             row=row)
         return items
 
@@ -139,7 +147,7 @@ class DishData(BaseRestaurantTableData):
     def dialog_items(self, row=None):
         items = self.generate_dialog_items(
             [(CustomDialogText, lambda x: x),
-             (CustomDialogText, lambda x: int(x) > 0),
+             (CustomDialogText, lambda x: float(x) > 0),
              (CustomDialogList, ('dishtype', 'title'), ('dishtype', 'id'), None)],
             row=row)
         return items
@@ -188,7 +196,9 @@ class CookData(BaseRestaurantTableData):
         super().__init__(widget, cur)
 
     def update(self):
-        return super().update()
+        que = super().update()
+        que += f' order by {self.table_name}.name'
+        return que
 
     def dialog_items(self, row=None):
         items = self.generate_dialog_items(
@@ -204,7 +214,9 @@ class WaiterData(BaseRestaurantTableData):
         super().__init__(widget, cur)
 
     def update(self):
-        return super().update()
+        que = super().update()
+        que += f' order by {self.table_name}.name'
+        return que
 
     def dialog_items(self, row=None):
         items = self.generate_dialog_items(
@@ -221,7 +233,9 @@ class OrderData(BaseRestaurantTableData):
         self.replace_cols = {'waiterid': ('waiter', 'waiter', 'name', 'id')}
 
     def update(self):
-        return super().update()
+        que = super().update()
+        que += f' order by {self.table_name}.id desc'
+        return que
 
     def dialog_items(self, row=None):
         items = self.generate_dialog_items(
@@ -236,7 +250,7 @@ class OrderDishData(BaseRestaurantTableData):
 
     def __init__(self, widget, cur: sqlite3.Cursor):
         super().__init__(widget, cur)
-        self.replace_cols = {'orderid': ('order_', 'order_', 'datetime', 'id'),
+        self.replace_cols = {'orderid': ('order_', 'order_', 'id', 'id'),
                              'cookid': ('cook', 'cook', 'name', 'id'),
                              'dishid': ('dish', 'dish', 'title', 'id')}
 
@@ -245,8 +259,24 @@ class OrderDishData(BaseRestaurantTableData):
 
     def dialog_items(self, row=None):
         items = self.generate_dialog_items(
-            [(CustomDialogList, ('order_', 'datetime'), ('order_', 'id'), None),
+            [(CustomDialogList, ('order_', 'id'), ('order_', 'id'), None),
              (CustomDialogList, ('cook', 'name'), ('cook', 'id'), None),
              (CustomDialogList, ('dish', 'title'), ('dish', 'id'), None)],
+            row=row)
+        return items
+
+
+class UnitData(BaseRestaurantTableData):
+    table_name = 'unit'
+
+    def __init__(self, widget, cur: sqlite3.Cursor):
+        super().__init__(widget, cur)
+
+    def update(self):
+        return super().update()
+
+    def dialog_items(self, row=None):
+        items = self.generate_dialog_items(
+            [(CustomDialogText, None)],
             row=row)
         return items

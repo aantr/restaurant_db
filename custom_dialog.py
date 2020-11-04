@@ -1,7 +1,6 @@
 from PyQt5.QtCore import Qt, QDateTime
-from PyQt5.QtGui import QColor, QPixmap, QIcon
 from PyQt5.QtWidgets import QWidget, QLineEdit, QComboBox, QDialog, \
-    QPushButton, QLabel, QMessageBox, QDateTimeEdit, QGraphicsDropShadowEffect
+    QPushButton, QLabel, QMessageBox, QDateTimeEdit
 
 
 class CustomDialogItem:
@@ -61,11 +60,11 @@ class CustomDialogList(CustomDialogItem):
 
     def get_data(self):
         if self.match is not None:
-            return self.match[self.widget.currentIndex()]
+            return self.match[self.list.index(self.widget.currentText())]
         return self.widget.currentText()
 
     def init_widget(self):
-        self.widget.addItems(map(str, self.list))
+        self.widget.addItems(map(str, sorted(self.list)))
 
     def set_default_data(self, data):
         if data is None:
@@ -76,21 +75,20 @@ class CustomDialogList(CustomDialogItem):
 class CustomDialogDateTime(CustomDialogItem):
     def __init__(self, name, correct=None, default=None):
         super().__init__(name, QDateTimeEdit, correct, default)
+        self.format = QDateTimeEdit().displayFormat()
 
     def init_widget(self):
         self.widget.setDateTime(QDateTime.currentDateTime())
 
     def get_data(self):
         self.widget: QDateTimeEdit
-        return self.widget.dateTime().toString(
-            self.widget.displayFormat())
+        return self.widget.dateTime().toString(self.format)
 
     def set_default_data(self, data):
         if data is None:
             return
         self.widget: QDateTimeEdit
-        self.widget.setDateTime(
-            QDateTime.fromString(data, self.widget.displayFormat()))
+        self.widget.setDateTime(QDateTime.fromString(data, self.format))
 
 
 class CustomDialog(QDialog):

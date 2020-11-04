@@ -1,18 +1,22 @@
+from typing import List, Union
+
 from PyQt5.QtCore import Qt
 from PyQt5 import uic
-from PyQt5.QtWidgets import QMessageBox, QWidget, QPushButton, QGridLayout, QTableWidget
+from PyQt5.QtWidgets import QMessageBox, QWidget, QPushButton, QGridLayout, QTableWidget, QTabWidget
+
+from base_window import BaseWindow
 from table_data import DishData, IngredientData, DishTypeData, DishIngredientData, \
-    CookData, WaiterData, OrderData, OrderDishData
+    CookData, WaiterData, OrderData, OrderDishData, TableData, UnitData
 from custom_dialog import CustomDialog
 import sqlite3
 
-from utils import add_arguments, fill_table, get_selected_rows, add_shadow
+from utils import add_arguments, fill_table, get_selected_rows
 
 
-class InputRestaurantWidgetBackButton(QWidget):
+class EditDatabaseWidget(BaseWindow):
     def __init__(self, main_menu_widget):
         super().__init__()
-        self.main_menu_widget = main_menu_widget
+        self.previous_widget = main_menu_widget
 
         self.con = sqlite3.connect('restaurant_db.sqlite')
         self.cur = self.con.cursor()
@@ -22,12 +26,7 @@ class InputRestaurantWidgetBackButton(QWidget):
     def init_ui(self):
         uic.loadUi('input_restaurant.ui', self)
         self.setFixedSize(self.size())
-
-        # Turn off frame
-        self.setWindowFlag(Qt.FramelessWindowHint)
-        self.setAttribute(Qt.WA_TranslucentBackground)
-        # Drop shadow
-        self.shadow = add_shadow(self, self.frame)
+        super().init_ui()
 
         self.cur.execute('''select name from sqlite_master where type='table' ''')
         # Parse all table names in database
@@ -35,8 +34,10 @@ class InputRestaurantWidgetBackButton(QWidget):
         parse_lower = list(map(str.lower, table_names_parse))
 
         # TableData
-        self.table_data_types = [DishData, IngredientData, DishTypeData, DishIngredientData,
-                                 CookData, WaiterData, OrderData, OrderDishData]
+        self.table_data_types = [OrderData, OrderDishData, IngredientData, DishData, DishIngredientData,
+                                 DishTypeData, CookData, WaiterData, UnitData]
+        tables: List[Union[TableData]]
+        self.tables = []
 
         # Table names from TableData
         self.table_names = [i.table_name for i in self.table_data_types]
@@ -47,11 +48,13 @@ class InputRestaurantWidgetBackButton(QWidget):
         for table_name, table_data_type in zip(self.table_names, self.table_data_types):
             exec(f'self.{table_name} = QTableWidget(self)')
             current_table: QTableWidget = eval(f'self.{table_name}')
+
+            # Add, Edit, Delete buttons
             btn_table_add = QPushButton('Add item', self)
             btn_table_edit = QPushButton('Edit item', self)
             btn_table_delete = QPushButton('Delete items', self)
 
-            # Add, Edit, Delete buttons
+            # Tab
             tab = QWidget()
             layout = QGridLayout()
             n_cols = 20
@@ -61,6 +64,7 @@ class InputRestaurantWidgetBackButton(QWidget):
             layout.addWidget(btn_table_delete, 0, 2)
             layout.addWidget(QWidget(), 0, n_cols - 1)
             tab.setLayout(layout)
+
             self.tab_widget.addTab(tab, table_name)
 
             # Create TableData object
@@ -74,10 +78,17 @@ class InputRestaurantWidgetBackButton(QWidget):
             current_table.doubleClicked.connect(add_arguments(
                 self.table_edit_clicked, table_data))
 
-            self.table_update(table_data)
+            self.tables.append(table_data)
 
-    def get_connects(self):
-        return [(self.btn_back.clicked, self.main_menu_widget())]
+        # Update if tab changed
+        def tab_changed(index):
+            self.table_update(self.tables[index])
+
+        self.tab_widget.currentChanged.connect(tab_changed)
+        tab_changed(self.tab_widget.currentIndex())
+
+    def get_window_transition(self):
+        return [(self.btn_back.clicked, self.previous_widget())]
 
     def close(self):
         super().close()
@@ -123,15 +134,33 @@ class InputRestaurantWidgetBackButton(QWidget):
             return
         rows = list(map(lambda x: x[1], rows))
         ans = QMessageBox.question(
-            self, '', 'Are you sure you want to delete all selected rows?',
+            self, 'Question', f'Are you sure you want to delete '
+                              f'{len(rows)} selected row{"s" * int(len(rows) > 1)}\n'
+                              f'and all records with this item?',
             QMessageBox.Yes, QMessageBox.No)
         if ans == QMessageBox.Yes:
-            self.cur.execute(table_data.delete(rows))
-            self.con.commit()
-        self.table_update(table_data)
+            ans = QMessageBox.warning(
+                self, 'Warning', f'All records with this item will be removed.\n'
+                                 f'Continue?',
+                QMessageBox.Yes, QMessageBox.No)
+            if ans == QMessageBox.Yes:
+                self.cur.execute(table_data.delete(rows))
+                self.con.commit()
+                for table_data in self.tables:
+                    self.table_update(table_data)
 
     def table_update(self, table_data):
         """Fill table with TableData"""
         data = self.cur.execute(table_data.update()).fetchall()
         head = list(map(lambda x: x[0].capitalize(), self.cur.description))
+
+        # Delete all rows with null object (if object deleted)
+        damaged_ids = list(map(lambda x: x[0], filter(lambda x: None in x, data)))
+        if damaged_ids:
+            for i in damaged_ids:
+                self.cur.execute(f'''delete from {table_data.table_name} 
+                                        where id = ?''', (i,))
+            self.con.commit()
+            data = self.cur.execute(table_data.update()).fetchall()
+
         fill_table(table_data.widget, head, data)
