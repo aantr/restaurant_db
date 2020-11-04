@@ -53,9 +53,9 @@ class CustomDialogText(CustomDialogItem):
 
 
 class CustomDialogList(CustomDialogItem):
-    def __init__(self, name, list, match=None, correct=None, default=None):
+    def __init__(self, name, items_list, match=None, correct=None, default=None):
         super().__init__(name, QComboBox, correct, default)
-        self.list = list
+        self.list = list(map(str, items_list))
         self.match = match
 
     def get_data(self):
@@ -64,7 +64,7 @@ class CustomDialogList(CustomDialogItem):
         return self.widget.currentText()
 
     def init_widget(self):
-        self.widget.addItems(map(str, sorted(self.list)))
+        self.widget.addItems(sorted(self.list))
 
     def set_default_data(self, data):
         if data is None:

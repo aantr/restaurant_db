@@ -1,5 +1,5 @@
 from PyQt5.QtCore import Qt, QPoint
-from PyQt5.QtGui import QColor
+from PyQt5.QtGui import QColor, QIcon, QPixmap
 from PyQt5.QtWidgets import QWidget, QGraphicsDropShadowEffect, QMessageBox
 
 
@@ -21,6 +21,8 @@ class BaseWindow(QWidget):
         # Frame move
         self.start_pos = None
 
+        # Design
+        # White background on QMessageBox and QDialog
         self.setStyleSheet('QMessageBox{background: #fff;} '
                            'QDialog{background: #fff;}')
 
