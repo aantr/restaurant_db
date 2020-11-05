@@ -35,22 +35,21 @@ border-radius: 5px;
 QWidget{
 font-family: &quot;Segoe UI&quot;;
 }
+
 QPushButton{
-background-color: #CA94D4;
+background-color: #337AB7;
 font-weight: bold;
 font-style: italic;
 color: #fff;
 font-size: 12px;
 border-radius: 3px;
 }
-
-
 QPushButton:hover{
-background-color: #bA84c4;
+background-color: #135A97;
 }
 
 QPushButton:pressed{
-background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:0, y2:1, stop:0 #CA94D4, stop:1 #bA84c4);
+background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:0, y2:1, stop:0 #337AB7, stop:1 #135A97);
 }</string>
    </property>
    <property name="frameShape">
@@ -106,7 +105,7 @@ background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:0, y2:1, stop:0 #CA
      </font>
     </property>
     <property name="styleSheet">
-     <string notr="true">color: #CA94D4;</string>
+     <string notr="true">color: #337AB7;</string>
     </property>
     <property name="text">
      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Created:&lt;/span&gt; &amp;lt;-------------&amp;gt;, &amp;lt;-------------&amp;gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
@@ -194,15 +193,19 @@ background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:0, y2:1, stop:0 #CA
     </property>
     <property name="styleSheet">
      <string notr="true">QPushButton{
-background-color: #D67DA5;
+background-color: #fff;
+color: #337AB7;
+border-style: solid;
+border-width: 2;
+border-color: #337AB7;
 }
 
 QPushButton:hover{
-background-color: #c66D95;
+background-color: #dfeffD;
 }
 
 QPushButton:pressed{
-background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:0, y2:1, stop:0 #D67DA5, stop:1 #c66D95);
+background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:0, y2:1, stop:0 #fff, stop:1 #BDDDED);
 }</string>
     </property>
     <property name="text">

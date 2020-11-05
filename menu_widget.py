@@ -1,4 +1,6 @@
 from PyQt5 import uic
+from PyQt5.QtGui import QColor, QPalette
+
 from base_window import BaseWindow
 from edit_db_widget import EditDatabaseWidget
 from reports_widget import ReportsWidget
@@ -10,7 +12,7 @@ class MenuWidget(BaseWindow):
         self.init_ui()
 
     def init_ui(self):
-        uic.loadUi('menu.ui', self)
+        uic.loadUi('UI/menu.ui', self)
         self.setFixedSize(self.size())
         super().init_ui()
 

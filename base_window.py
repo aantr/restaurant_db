@@ -1,10 +1,11 @@
 from PyQt5.QtCore import Qt, QPoint
 from PyQt5.QtGui import QColor, QIcon, QPixmap
-from PyQt5.QtWidgets import QWidget, QGraphicsDropShadowEffect, QMessageBox
+from PyQt5.QtWidgets import QWidget, QGraphicsDropShadowEffect, QMessageBox, QFrame, QMainWindow
 
 
-class BaseWindow(QWidget):
+class BaseWindow(QMainWindow):
     """Base class of all window widgets, ex. ReportsWidget"""
+    frame: QFrame
 
     def init_ui(self):
         self.setWindowTitle('Restaurant database')

@@ -10,7 +10,7 @@ class App(QMainWindow):
         super().__init__()
 
     def show(self):
-        self.widget = EditDatabaseWidget(MenuWidget)
+        self.widget = MenuWidget()
 
         for event, new_widget in self.widget.get_window_transition():
             event.connect(self.create_new(self.widget, new_widget))

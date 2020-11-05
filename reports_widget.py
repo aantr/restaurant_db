@@ -15,7 +15,7 @@ class ReportsWidget(BaseWindow):
         self.init_ui()
 
     def init_ui(self):
-        uic.loadUi('reports.ui', self)
+        uic.loadUi('UI/reports.ui', self)
         super().init_ui()
 
     def get_window_transition(self):

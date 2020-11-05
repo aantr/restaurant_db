@@ -24,7 +24,7 @@ class EditDatabaseWidget(BaseWindow):
         self.init_ui()
 
     def init_ui(self):
-        uic.loadUi('input_restaurant.ui', self)
+        uic.loadUi('UI/input_restaurant.ui', self)
         self.setFixedSize(self.size())
         super().init_ui()
 

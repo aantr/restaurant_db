@@ -30,6 +30,22 @@ background: #fff;
 
 QWidget{
 font-family: &quot;Segoe UI&quot;;
+}
+
+QPushButton#btn_back{
+background-color: #337AB7;
+font-weight: bold;
+font-style: italic;
+color: #fff;
+font-size: 12px;
+border-radius: 3px;
+}
+QPushButton:hove#btn_backr{
+background-color: #135A97;
+}
+
+QPushButton:pressed#btn_back{
+background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:0, y2:1, stop:0 #337AB7, stop:1 #135A97);
 }</string>
    </property>
    <property name="frameShape">
@@ -60,23 +76,7 @@ font-family: &quot;Segoe UI&quot;;
      <cursorShape>PointingHandCursor</cursorShape>
     </property>
     <property name="styleSheet">
-     <string notr="true">QPushButton{
-background-color: #CA94D4;
-font-weight: bold;
-font-style: italic;
-color: #fff;
-font-size: 12px;
-border-radius: 3px;
-}
-
-
-QPushButton:hover{
-background-color: #bA84c4;
-}
-
-QPushButton:pressed{
-background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:0, y2:1, stop:0 #CA94D4, stop:1 #bA84c4);
-}</string>
+     <string notr="true"/>
     </property>
     <property name="text">
      <string>Back</string>
