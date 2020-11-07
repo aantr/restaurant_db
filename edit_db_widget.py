@@ -1,4 +1,4 @@
-from PyQt5.QtCore import Qt
+from PyQt5.QtCore import Qt, QDateTime, QDate, QTime
 from PyQt5 import uic
 from PyQt5.QtWidgets import QMessageBox, QWidget, QPushButton, QGridLayout, QTableWidget, QTabWidget
 
@@ -8,7 +8,7 @@ from table_data import DishData, IngredientData, DishTypeData, DishIngredientDat
 from custom_dialog import CustomDialog
 import sqlite3
 
-from utils import add_arguments, fill_table, get_selected_rows, permission_denied_msg
+from utils import add_arguments, fill_table, get_selected_rows, permission_denied_msg, date_time_format
 
 
 class EditDatabaseWidget(BaseWindow):
@@ -17,6 +17,34 @@ class EditDatabaseWidget(BaseWindow):
 
         self.con = sqlite3.connect(self.app.db_filename)
         self.cur = self.con.cursor()
+
+        # if 1:
+        #     import random
+        #     for day in range(3, 15):
+        #         date = QDate(2020, 10, day)
+        #
+        #         dists = [(0, 6), (6, 10), (6, 10), (9, 13), (9, 13), (9, 13),
+        #                  (12, 15), (12, 15), (12, 15), (12, 15),
+        #                  (15, 17), (15, 17), (15, 17),
+        #                  (17, 19), (17, 19), (17, 19),
+        #                  (19, 21), (17, 21),
+        #                  (21, 23)]
+        #         for _ in range(random.randint(40, 60) if date.dayOfWeek() < 6 else random.randint(50, 70)):
+        #             d = random.choice(dists)
+        #             time = QTime(random.randint(*d), random.randint(0, 59))
+        #             waiterid = random.choice(self.cur.execute('select id from waiter').fetchall())[0]
+        #             datetime = QDateTime(date, time).toString(date_time_format())
+        #
+        #             self.cur.execute(f'''insert into orderclient(waiterid, datetime) values("{waiterid}", "{datetime}")''')
+        #             for _ in range(1, random.randint(2, 5 if date.dayOfWeek() < 6 else 7)):
+        #                 cookid = random.choice(self.cur.execute('select id from cook').fetchall())[0]
+        #                 dishid = random.choice(self.cur.execute('select id from dish').fetchall())[0]
+        #                 orderid = max(map(lambda x: x[0], self.cur.execute('select id from orderclient').fetchall()))
+        #                 print(orderid, dishid, cookid)
+        #                 self.cur.execute(
+        #                     f'''insert into orderdish(orderid, cookid, dishid) values({orderid}, {cookid}, {dishid})''')
+
+        # self.con.commit()
 
         # TableData
         self.table_data_classes = [
@@ -49,7 +77,8 @@ class EditDatabaseWidget(BaseWindow):
             if j.lower() in parse_lower:
                 self.table_names[i] = table_names_parse[parse_lower.index(j)]
 
-        for table_name, table_data_type in zip(self.table_names, self.table_data_classes):
+        for table_name, table_data_type in \
+                zip(self.table_names, self.table_data_classes):
             exec(f'self.{table_name} = QTableWidget(self)')
             current_table: QTableWidget = eval(f'self.{table_name}')
 
@@ -77,12 +106,13 @@ class EditDatabaseWidget(BaseWindow):
                             [self.table_add_clicked, self.table_edit_clicked,
                              self.table_delete_clicked]):
                 # Create permission control
-                i[1].clicked.connect(add_arguments(self.permission_control(j, table_data, i[0])))
+                i[1].clicked.connect(add_arguments(
+                    self.permission_control(j, table_data, i[0])))
                 # i.clicked.connect(add_arguments(j, table_data))
 
             # Edit if double clicked on item
             current_table.doubleClicked.connect(add_arguments(
-                self.table_edit_clicked, table_data))
+                self.permission_control(self.table_edit_clicked, table_data, 1)))
 
             self.tables.append(table_data)
 

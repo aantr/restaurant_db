@@ -1,5 +1,5 @@
 from PyQt5.QtCore import Qt
-from PyQt5.QtWidgets import QTableWidget, QTableWidgetItem, QMessageBox
+from PyQt5.QtWidgets import QTableWidget, QTableWidgetItem, QMessageBox, QDateTimeEdit
 
 
 def add_arguments(f, *args):
@@ -11,6 +11,11 @@ def add_arguments(f, *args):
 
 def permission_denied_msg(w):
     QMessageBox.critical(w, 'Error', 'Permission denied')
+
+
+def date_time_format():
+    return 'yyyy/MM/dd hh:mm'
+    return QDateTimeEdit().displayFormat()
 
 
 def get_selected_rows(table: QTableWidget):

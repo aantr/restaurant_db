@@ -10,7 +10,7 @@ class App(QMainWindow):
         super().__init__()
 
         self.db_filename = 'restaurant_db.sqlite'
-        self.login_as_admin = False
+        self.login_as_admin = True
 
         self.stack_widgets = []
 

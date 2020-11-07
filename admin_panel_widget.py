@@ -7,6 +7,7 @@ from PyQt5.QtCore import Qt, QDateTime
 from PyQt5.QtWidgets import QMessageBox, QLineEdit, QDateTimeEdit
 
 from base_window import BaseWindow
+from utils import date_time_format
 
 
 class AdminPanelWidget(BaseWindow):
@@ -96,7 +97,7 @@ class AdminPanelWidget(BaseWindow):
     def add_log(self):
         with open('admin/log.txt', 'a') as f:
             f.write(QDateTime.currentDateTime().toString(
-                QDateTimeEdit().displayFormat()))
+                date_time_format()))
             f.write('\n')
 
     def get_window_transition(self):

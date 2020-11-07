@@ -2,6 +2,8 @@ from PyQt5.QtCore import Qt, QDateTime
 from PyQt5.QtWidgets import QWidget, QLineEdit, QComboBox, QDialog, \
     QPushButton, QLabel, QMessageBox, QDateTimeEdit
 
+from utils import date_time_format
+
 
 class CustomDialogItem:
     def __init__(self, name, widget_type, correct, default):
@@ -75,10 +77,11 @@ class CustomDialogList(CustomDialogItem):
 class CustomDialogDateTime(CustomDialogItem):
     def __init__(self, name, correct=None, default=None):
         super().__init__(name, QDateTimeEdit, correct, default)
-        self.format = QDateTimeEdit().displayFormat()
+        self.format = date_time_format()
 
     def init_widget(self):
         self.widget.setDateTime(QDateTime.currentDateTime())
+        self.widget.setDisplayFormat(self.format)
 
     def get_data(self):
         self.widget: QDateTimeEdit

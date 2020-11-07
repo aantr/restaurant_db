@@ -1,2 +1,3 @@
 # Log file with dates when admin logged in
 
+07.11.2020 14:36

@@ -254,7 +254,7 @@ class OrderData(BaseTableData):
 
     def update(self):
         que = super().update()
-        que += f' order by {self.table_name}.id desc'
+        que += f' order by datetime desc'
         return que
 
     def dialog_items(self, row=None):
