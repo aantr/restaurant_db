@@ -8,7 +8,7 @@ from table_data import DishData, IngredientData, DishTypeData, DishIngredientDat
 from custom_dialog import CustomDialog
 import sqlite3
 
-from utils import add_arguments, fill_table, get_selected_rows
+from utils import add_arguments, fill_table, get_selected_rows, permission_denied_msg
 
 
 class EditDatabaseWidget(BaseWindow):
@@ -162,15 +162,6 @@ class EditDatabaseWidget(BaseWindow):
         data = self.cur.execute(table_data.update()).fetchall()
         head = list(map(lambda x: x[0].capitalize(), self.cur.description))
 
-        # Delete all rows with null object
-        # damaged_ids = list(map(lambda x: x[0], filter(lambda x: None in x, data)))
-        # if damaged_ids:
-        #     for i in damaged_ids:
-        #         self.cur.execute(f'''delete from {table_data.table_name}
-        #                                 where id = ?''', (i,))
-        #     self.con.commit()
-        #     data = self.cur.execute(table_data.update()).fetchall()
-
         fill_table(table_data.widget, head, data)
 
     def permission_control(self, f, table_data: BaseTableData, btn):
@@ -179,11 +170,8 @@ class EditDatabaseWidget(BaseWindow):
         def decorated():
             if not self.app.login_as_admin and \
                     table_data.__class__ in self.banned_for_user_table_data[btn]:
-                self.permission_denied_msg()
+                permission_denied_msg(self)
                 return
             f(table_data)
 
         return decorated
-
-    def permission_denied_msg(self):
-        QMessageBox.critical(self, 'Error', 'Permission denied')

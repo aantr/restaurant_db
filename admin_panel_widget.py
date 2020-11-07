@@ -3,8 +3,8 @@ import os
 from PyQt5 import uic
 import hashlib
 
-from PyQt5.QtCore import Qt
-from PyQt5.QtWidgets import QMessageBox, QLineEdit
+from PyQt5.QtCore import Qt, QDateTime
+from PyQt5.QtWidgets import QMessageBox, QLineEdit, QDateTimeEdit
 
 from base_window import BaseWindow
 
@@ -51,6 +51,7 @@ class AdminPanelWidget(BaseWindow):
         if correct:
             self.app.login_as_admin = True
             self.update_widgets_enabled()
+            self.add_log()
             QMessageBox.information(self, 'Information',
                                     'Successful logged in')
         else:
@@ -91,6 +92,12 @@ class AdminPanelWidget(BaseWindow):
         for i in [self.line_login, self.line_current,
                   self.line_new1, self.line_new2]:
             i.setText('')
+
+    def add_log(self):
+        with open('admin/log.txt', 'a') as f:
+            f.write(QDateTime.currentDateTime().toString(
+                QDateTimeEdit().displayFormat()))
+            f.write('\n')
 
     def get_window_transition(self):
         return [(self.btn_back.clicked, self.app.get_previous_widget())]

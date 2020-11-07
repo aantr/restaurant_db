@@ -1,5 +1,5 @@
 from PyQt5.QtCore import Qt
-from PyQt5.QtWidgets import QTableWidget, QTableWidgetItem
+from PyQt5.QtWidgets import QTableWidget, QTableWidgetItem, QMessageBox
 
 
 def add_arguments(f, *args):
@@ -7,6 +7,10 @@ def add_arguments(f, *args):
         return f(*args)
 
     return decorated
+
+
+def permission_denied_msg(w):
+    QMessageBox.critical(w, 'Error', 'Permission denied')
 
 
 def get_selected_rows(table: QTableWidget):
