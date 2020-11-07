@@ -5,11 +5,10 @@ from base_window import BaseWindow
 
 
 class ReportsWidget(BaseWindow):
-    def __init__(self, main_menu_widget):
-        super().__init__()
-        self.previous_widget = main_menu_widget
+    def __init__(self, app):
+        super().__init__(app)
 
-        self.con = sqlite3.connect('restaurant_db.sqlite')
+        self.con = sqlite3.connect(self.app.db_filename)
         self.cur = self.con.cursor()
 
         self.init_ui()
@@ -19,7 +18,7 @@ class ReportsWidget(BaseWindow):
         super().init_ui()
 
     def get_window_transition(self):
-        return [(self.btn_back.clicked, self.previous_widget())]
+        return [(self.btn_back.clicked, self.app.get_previous_widget())]
 
     @staticmethod
     def add_arguments(f, *args):

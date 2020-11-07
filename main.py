@@ -1,7 +1,7 @@
 import sys
 from PyQt5.QtWidgets import QApplication, QMainWindow
 
-from edit_db_widget import EditDatabaseWidget
+from base_window import BaseWindow
 from menu_widget import MenuWidget
 
 
@@ -9,21 +9,28 @@ class App(QMainWindow):
     def __init__(self):
         super().__init__()
 
+        self.db_filename = 'restaurant_db.sqlite'
+        self.login_as_admin = False
+
+        self.stack_widgets = []
+
     def show(self):
-        self.widget = MenuWidget()
+        self.create_new(None, MenuWidget)()
 
-        for event, new_widget in self.widget.get_window_transition():
-            event.connect(self.create_new(self.widget, new_widget))
-        self.widget.show()
-
-    def create_new(self, w1, w2):
+    def create_new(self, w1: BaseWindow, w2_class):
         def decorated():
+            w2 = w2_class(self)
             for event, new_widget in w2.get_window_transition():
                 event.connect(self.create_new(w2, new_widget))
             w2.show()
-            w1.close()
+            if w1:
+                w1.close()
+            self.stack_widgets.append(w2_class)
 
         return decorated
+
+    def get_previous_widget(self):
+        return self.stack_widgets.pop(-1)
 
 
 if __name__ == '__main__':

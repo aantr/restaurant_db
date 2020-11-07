@@ -32,7 +32,7 @@ class TableData:
         pass
 
 
-class BaseRestaurantTableData(TableData):
+class BaseTableData(TableData):
     """Use table name to work with table"""
     table_name = None
 
@@ -44,6 +44,9 @@ class BaseRestaurantTableData(TableData):
 
         # Replace real column names and data for better displaying
         self.replace_cols = {}
+
+        # Tables which use this table
+        self.usage = []
 
     def update(self):
         self.cur.execute(f'select * from {self.table_name}')
@@ -59,6 +62,16 @@ class BaseRestaurantTableData(TableData):
                     {self.table_name}.{old_col}'''
         que += ')'
         return que
+
+    def check_usage(self, rows):  # row: [id, field1, field2]
+        ids = list(map(lambda x: str(x[0]), rows))
+        for i in self.usage:
+            usage_ids = list(map(lambda x: str(x[0]), self.cur.execute(f'''
+                            select {i[1]} from {i[0]}''').fetchall()))
+            for id in ids:
+                if id in usage_ids:
+                    return True
+        return False
 
     def delete(self, rows):  # row: [id, field1, field2]
         ids = list(map(lambda x: x[0], rows))
@@ -113,12 +126,13 @@ class BaseRestaurantTableData(TableData):
         return items
 
 
-class IngredientData(BaseRestaurantTableData):
+class IngredientData(BaseTableData):
     table_name = 'ingredient'
 
     def __init__(self, widget, cur: sqlite3.Cursor):
         super().__init__(widget, cur)
         self.replace_cols = {'unitid': ('unit', 'unit', 'title', 'id')}
+        self.usage = [('dishingredient', 'ingredientid')]
 
     def update(self, replace=()):
         que = super().update()
@@ -134,12 +148,14 @@ class IngredientData(BaseRestaurantTableData):
         return items
 
 
-class DishData(BaseRestaurantTableData):
+class DishData(BaseTableData):
     table_name = 'dish'
 
     def __init__(self, widget, cur: sqlite3.Cursor):
         super().__init__(widget, cur)
         self.replace_cols = {'typeid': ('type', 'dishtype', 'title', 'id')}
+        self.usage = [('orderdish', 'dishid'),
+                      ('dishingredient', 'dishid')]
 
     def update(self, replace=()):
         return super().update()
@@ -153,11 +169,12 @@ class DishData(BaseRestaurantTableData):
         return items
 
 
-class DishTypeData(BaseRestaurantTableData):
+class DishTypeData(BaseTableData):
     table_name = 'dishtype'
 
     def __init__(self, widget, cur: sqlite3.Cursor):
         super().__init__(widget, cur)
+        self.usage = [('dish', 'typeid')]
 
     def update(self, replace=()):
         return super().update()
@@ -169,7 +186,7 @@ class DishTypeData(BaseRestaurantTableData):
         return items
 
 
-class DishIngredientData(BaseRestaurantTableData):
+class DishIngredientData(BaseTableData):
     table_name = 'dishingredient'
 
     def __init__(self, widget, cur: sqlite3.Cursor):
@@ -189,11 +206,12 @@ class DishIngredientData(BaseRestaurantTableData):
         return items
 
 
-class CookData(BaseRestaurantTableData):
+class CookData(BaseTableData):
     table_name = 'cook'
 
     def __init__(self, widget, cur: sqlite3.Cursor):
         super().__init__(widget, cur)
+        self.usage = [('orderdish', 'cookid')]
 
     def update(self):
         que = super().update()
@@ -207,11 +225,12 @@ class CookData(BaseRestaurantTableData):
         return items
 
 
-class WaiterData(BaseRestaurantTableData):
+class WaiterData(BaseTableData):
     table_name = 'waiter'
 
     def __init__(self, widget, cur: sqlite3.Cursor):
         super().__init__(widget, cur)
+        self.usage = [('order', 'waiterid')]
 
     def update(self):
         que = super().update()
@@ -225,12 +244,13 @@ class WaiterData(BaseRestaurantTableData):
         return items
 
 
-class OrderData(BaseRestaurantTableData):
-    table_name = 'order_'
+class OrderData(BaseTableData):
+    table_name = 'orderclient'
 
     def __init__(self, widget, cur: sqlite3.Cursor):
         super().__init__(widget, cur)
         self.replace_cols = {'waiterid': ('waiter', 'waiter', 'name', 'id')}
+        self.usage = [('orderdish', 'orderid')]
 
     def update(self):
         que = super().update()
@@ -245,12 +265,12 @@ class OrderData(BaseRestaurantTableData):
         return items
 
 
-class OrderDishData(BaseRestaurantTableData):
+class OrderDishData(BaseTableData):
     table_name = 'orderdish'
 
     def __init__(self, widget, cur: sqlite3.Cursor):
         super().__init__(widget, cur)
-        self.replace_cols = {'orderid': ('order_', 'order_', 'id', 'id'),
+        self.replace_cols = {'orderid': ('orderclient', 'orderclient', 'id', 'id'),
                              'cookid': ('cook', 'cook', 'name', 'id'),
                              'dishid': ('dish', 'dish', 'title', 'id')}
 
@@ -259,18 +279,19 @@ class OrderDishData(BaseRestaurantTableData):
 
     def dialog_items(self, row=None):
         items = self.generate_dialog_items(
-            [(CustomDialogList, ('order_', 'id'), ('order_', 'id'), None),
+            [(CustomDialogList, ('orderclient', 'id'), ('orderclient', 'id'), None),
              (CustomDialogList, ('cook', 'name'), ('cook', 'id'), None),
              (CustomDialogList, ('dish', 'title'), ('dish', 'id'), None)],
             row=row)
         return items
 
 
-class UnitData(BaseRestaurantTableData):
+class UnitData(BaseTableData):
     table_name = 'unit'
 
     def __init__(self, widget, cur: sqlite3.Cursor):
         super().__init__(widget, cur)
+        self.usage = [('ingredient', 'unitid')]
 
     def update(self):
         return super().update()
