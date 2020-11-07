@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>900</width>
-    <height>540</height>
+    <width>1170</width>
+    <height>720</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -21,8 +21,8 @@
     <rect>
      <x>15</x>
      <y>15</y>
-     <width>871</width>
-     <height>511</height>
+     <width>1141</width>
+     <height>691</height>
     </rect>
    </property>
    <property name="styleSheet">
@@ -62,8 +62,8 @@ background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:0, y2:1, stop:0 #33
      <rect>
       <x>30</x>
       <y>75</y>
-      <width>811</width>
-      <height>406</height>
+      <width>1096</width>
+      <height>601</height>
      </rect>
     </property>
     <property name="currentIndex">
