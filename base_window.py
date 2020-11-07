@@ -57,4 +57,4 @@ class BaseWindow(QMainWindow):
             self.close()
 
     def get_window_transition(self):
-        pass
+        return []

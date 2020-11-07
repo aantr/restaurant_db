@@ -29,6 +29,13 @@ class App(QMainWindow):
 
         return decorated
 
+    def change_window(self, w1, w2_class):
+        w2 = w2_class(self)
+        w2.show()
+        if w1:
+            w1.close()
+        self.stack_widgets.append(w2_class)
+
     def get_previous_widget(self):
         return self.stack_widgets.pop(-1)
 

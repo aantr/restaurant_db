@@ -19,10 +19,3 @@ class ReportsWidget(BaseWindow):
 
     def get_window_transition(self):
         return [(self.btn_back.clicked, self.app.get_previous_widget())]
-
-    @staticmethod
-    def add_arguments(f, *args):
-        def decorated():
-            return f(*args)
-
-        return decorated
