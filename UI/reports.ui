@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>900</width>
-    <height>540</height>
+    <height>541</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -92,8 +92,13 @@ background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:0, y2:1, stop:0 #33
      </rect>
     </property>
     <property name="currentIndex">
-     <number>-1</number>
+     <number>0</number>
     </property>
+    <widget class="QWidget" name="tab_attendance">
+     <attribute name="title">
+      <string>Attendance</string>
+     </attribute>
+    </widget>
    </widget>
   </widget>
  </widget>
