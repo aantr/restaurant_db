@@ -8,7 +8,7 @@ class ReportsWidget(BaseWindow):
     def __init__(self, app):
         super().__init__(app)
 
-        self.con = sqlite3.connect(self.app.db_filename)
+        self.con = sqlite3.connect(self.app.DB_FILENAME)
         self.cur = self.con.cursor()
 
         self.init_ui()

@@ -1,17 +1,50 @@
+import sqlite3
 import sys
 from PyQt5.QtWidgets import QApplication, QMainWindow
 
 from base_window import BaseWindow
 from menu_widget import MenuWidget
+from table_data import DishData, IngredientData, DishTypeData, DishIngredientData, \
+    CookData, WaiterData, OrderData, OrderDishData, UnitData
 
 
 class App(QMainWindow):
     def __init__(self):
         super().__init__()
 
-        self.db_filename = 'restaurant_db.sqlite'
-        self.login_as_admin = False
+        self.DB_FILENAME = 'restaurant_db.sqlite'
+        self.ACCESS_TABLES_FILENAME = 'admin/access.bin'
+        self.PASSWORD_KEY_FILENAME = 'admin/key.bin'
+        self.PASSWORD_SALT_FILENAME = 'admin/salt.bin'
+        self.LOG_ADMIN_FILENAME = 'admin/log.txt'
 
+        # TableData
+        self.TABLE_DATA_CLASSES = [
+            OrderData, OrderDishData, IngredientData, DishData, DishIngredientData,
+            DishTypeData, CookData, WaiterData, UnitData
+        ]
+
+        # Parse all table names in database
+        con = sqlite3.connect(self.DB_FILENAME)
+        table_names_parse = list(map(lambda x: x[0], con.cursor().execute('''
+        select name from sqlite_master where type='table' ''').fetchall()[1:]))
+        parse_lower = list(map(str.lower, table_names_parse))
+        con.close()
+
+        # Convert table names from TableData to CamelCase
+        for i, j in enumerate(self.TABLE_DATA_CLASSES):
+            if j.table_name.lower() in parse_lower:
+                j.table_name = table_names_parse[parse_lower.index(j.table_name)]
+
+        # Banned tables for user
+        self.banned_for_user_table_data = []
+        with open(self.ACCESS_TABLES_FILENAME, 'rb') as f:
+            for i in f.readlines():
+                self.banned_for_user_table_data.append([])
+                for j in i.strip(b'\n'):
+                    self.banned_for_user_table_data[-1].append(bool(j))
+
+        self.login_as_admin = False
         self.stack_widgets = []
 
     def show(self):

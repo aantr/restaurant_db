@@ -1,21 +1,19 @@
-from PyQt5.QtCore import Qt, QDateTime, QDate, QTime
 from PyQt5 import uic
 from PyQt5.QtWidgets import QMessageBox, QWidget, QPushButton, QGridLayout, QTableWidget, QTabWidget
 
 from base_window import BaseWindow
-from table_data import DishData, IngredientData, DishTypeData, DishIngredientData, \
-    CookData, WaiterData, OrderData, OrderDishData, TableData, UnitData, BaseTableData
+from table_data import BaseTableData
 from custom_dialog import CustomDialog
 import sqlite3
 
-from utils import add_arguments, fill_table, get_selected_rows, permission_denied_msg, date_time_format
+from utils import add_arguments, fill_table, get_selected_rows, permission_denied_msg
 
 
 class EditDatabaseWidget(BaseWindow):
     def __init__(self, app):
         super().__init__(app)
 
-        self.con = sqlite3.connect(self.app.db_filename)
+        self.con = sqlite3.connect(self.app.DB_FILENAME)
         self.cur = self.con.cursor()
 
         # if 1:
@@ -46,19 +44,8 @@ class EditDatabaseWidget(BaseWindow):
 
         # self.con.commit()
 
-        # TableData
-        self.table_data_classes = [
-            OrderData, OrderDishData, IngredientData, DishData, DishIngredientData,
-            DishTypeData, CookData, WaiterData, UnitData
-        ]
+        self.table_names = [i.table_name for i in self.app.TABLE_DATA_CLASSES]
         self.tables = []
-
-        # Banned tables for user
-        self.banned_for_user_table_data = [
-            self.table_data_classes[2:],  # Add
-            self.table_data_classes,  # Edit
-            self.table_data_classes  # Delete
-        ]
 
         self.init_ui()
 
@@ -66,19 +53,8 @@ class EditDatabaseWidget(BaseWindow):
         uic.loadUi('UI/edit_db.ui', self)
         super().init_ui()
 
-        self.cur.execute('''select name from sqlite_master where type='table' ''')
-        # Parse all table names in database
-        table_names_parse = list(map(lambda x: x[0], self.cur.fetchall()[1:]))
-        parse_lower = list(map(str.lower, table_names_parse))
-
-        # Table names from TableData
-        self.table_names = [i.table_name for i in self.table_data_classes]
-        for i, j in enumerate(self.table_names.copy()):
-            if j.lower() in parse_lower:
-                self.table_names[i] = table_names_parse[parse_lower.index(j)]
-
         for table_name, table_data_type in \
-                zip(self.table_names, self.table_data_classes):
+                zip(self.table_names, self.app.TABLE_DATA_CLASSES):
             exec(f'self.{table_name} = QTableWidget(self)')
             current_table: QTableWidget = eval(f'self.{table_name}')
 
@@ -139,7 +115,7 @@ class EditDatabaseWidget(BaseWindow):
         if res:  # If ok pressed
             self.cur.execute(table_data.add(res))
             self.con.commit()
-        self.table_update(table_data)
+            self.table_update(table_data)
 
     def table_edit_clicked(self, table_data: BaseTableData):
         """Edits selected rows in table with TableData"""
@@ -158,7 +134,7 @@ class EditDatabaseWidget(BaseWindow):
             res.insert(0, row[0])
             self.cur.execute(table_data.edit(res))
             self.con.commit()
-        self.table_update(table_data)
+            self.table_update(table_data)
 
     def table_delete_clicked(self, table_data: BaseTableData):
         """Deletes selected rows in table with TableData"""
@@ -184,8 +160,7 @@ class EditDatabaseWidget(BaseWindow):
         if ans == QMessageBox.Yes:
             self.cur.execute(table_data.delete(rows))
             self.con.commit()
-            for table_data in self.tables:
-                self.table_update(table_data)
+            self.table_update(table_data)
 
     def table_update(self, table_data: BaseTableData):
         """Fill table with TableData"""
@@ -199,7 +174,8 @@ class EditDatabaseWidget(BaseWindow):
 
         def decorated():
             if not self.app.login_as_admin and \
-                    table_data.__class__ in self.banned_for_user_table_data[btn]:
+                    self.app.banned_for_user_table_data[btn][
+                        self.app.TABLE_DATA_CLASSES.index(table_data.__class__)]:
                 permission_denied_msg(self)
                 return
             f(table_data)
