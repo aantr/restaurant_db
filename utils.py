@@ -15,7 +15,6 @@ def permission_denied_msg(w):
 
 def date_time_format():
     return 'yyyy/MM/dd hh:mm'
-    return QDateTimeEdit().displayFormat()
 
 
 def get_selected_rows(table: QTableWidget):

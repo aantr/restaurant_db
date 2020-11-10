@@ -5,8 +5,8 @@ from PyQt5.QtWidgets import QStyle
 from admin_panel_widget import AdminPanelWidget
 from base_window import BaseWindow
 from edit_db_widget import EditDatabaseWidget
-from help_widget import HelpWidget
 from reports_widget import ReportsWidget
+from utils import permission_denied_msg
 
 
 class MenuWidget(BaseWindow):
@@ -23,21 +23,20 @@ class MenuWidget(BaseWindow):
         else:
             self.label_info.setText('Logged in as: <b>User</b>')
 
+        self.btn_edit.clicked.connect(self.edit_clicked)
+        self.btn_reports.clicked.connect(self.reports_clicked)
         self.btn_admin.clicked.connect(self.admin_clicked)
-        self.btn_exit.clicked.connect(self.exit)
+
+        self.btn_exit.clicked.connect(self.app.pop)
+
+    def edit_clicked(self):
+        self.app.push(EditDatabaseWidget)
+
+    def reports_clicked(self):
+        if self.app.login_as_admin:
+            self.app.push(ReportsWidget)
+        else:
+            permission_denied_msg(self)
 
     def admin_clicked(self):
-        if self.app.login_as_admin:
-            ...
-        else:
-            ...
-
-    def get_window_transition(self):
-        return [(self.btn_input.clicked,
-                 EditDatabaseWidget),
-                (self.btn_reports.clicked,
-                 ReportsWidget),
-                (self.btn_help.clicked,
-                 HelpWidget),
-                (self.btn_admin.clicked,
-                 AdminPanelWidget)]
+        self.app.push(AdminPanelWidget)

@@ -16,34 +16,6 @@ class EditDatabaseWidget(BaseWindow):
         self.con = sqlite3.connect(self.app.DB_FILENAME)
         self.cur = self.con.cursor()
 
-        # if 1:
-        #     import random
-        #     for day in range(3, 15):
-        #         date = QDate(2020, 10, day)
-        #
-        #         dists = [(0, 6), (6, 10), (6, 10), (9, 13), (9, 13), (9, 13),
-        #                  (12, 15), (12, 15), (12, 15), (12, 15),
-        #                  (15, 17), (15, 17), (15, 17),
-        #                  (17, 19), (17, 19), (17, 19),
-        #                  (19, 21), (17, 21),
-        #                  (21, 23)]
-        #         for _ in range(random.randint(40, 60) if date.dayOfWeek() < 6 else random.randint(50, 70)):
-        #             d = random.choice(dists)
-        #             time = QTime(random.randint(*d), random.randint(0, 59))
-        #             waiterid = random.choice(self.cur.execute('select id from waiter').fetchall())[0]
-        #             datetime = QDateTime(date, time).toString(date_time_format())
-        #
-        #             self.cur.execute(f'''insert into orderclient(waiterid, datetime) values("{waiterid}", "{datetime}")''')
-        #             for _ in range(1, random.randint(2, 5 if date.dayOfWeek() < 6 else 7)):
-        #                 cookid = random.choice(self.cur.execute('select id from cook').fetchall())[0]
-        #                 dishid = random.choice(self.cur.execute('select id from dish').fetchall())[0]
-        #                 orderid = max(map(lambda x: x[0], self.cur.execute('select id from orderclient').fetchall()))
-        #                 print(orderid, dishid, cookid)
-        #                 self.cur.execute(
-        #                     f'''insert into orderdish(orderid, cookid, dishid) values({orderid}, {cookid}, {dishid})''')
-
-        # self.con.commit()
-
         self.table_names = [i.table_name for i in self.app.TABLE_DATA_CLASSES]
         self.tables = []
 
@@ -99,8 +71,7 @@ class EditDatabaseWidget(BaseWindow):
         self.tab_widget.currentChanged.connect(tab_changed)
         tab_changed(self.tab_widget.currentIndex())
 
-    def get_window_transition(self):
-        return [(self.btn_back.clicked, self.app.get_previous_widget())]
+        self.btn_back.clicked.connect(self.app.pop)
 
     def close(self):
         super().close()
@@ -175,7 +146,7 @@ class EditDatabaseWidget(BaseWindow):
         def decorated():
             if not self.app.login_as_admin and \
                     self.app.banned_for_user_table_data[btn][
-                        self.app.TABLE_DATA_CLASSES.index(table_data.__class__)]:
+                        self.app.TABLE_DATA_CLASSES.index(type(table_data))]:
                 permission_denied_msg(self)
                 return
             f(table_data)

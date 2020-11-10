@@ -83,11 +83,11 @@ background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:0, y2:1, stop:0 #33
      <set>Qt::AlignCenter</set>
     </property>
    </widget>
-   <widget class="QPushButton" name="btn_input">
+   <widget class="QPushButton" name="btn_edit">
     <property name="geometry">
      <rect>
       <x>285</x>
-      <y>180</y>
+      <y>195</y>
       <width>121</width>
       <height>31</height>
      </rect>
@@ -115,7 +115,7 @@ background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:0, y2:1, stop:0 #33
     <property name="geometry">
      <rect>
       <x>285</x>
-      <y>225</y>
+      <y>240</y>
       <width>121</width>
       <height>31</height>
      </rect>
@@ -185,7 +185,7 @@ background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:0, y2:1, stop:0 #ff
     <property name="geometry">
      <rect>
       <x>285</x>
-      <y>270</y>
+      <y>285</y>
       <width>121</width>
       <height>31</height>
      </rect>
@@ -221,48 +221,6 @@ background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:0, y2:1, stop:0 #ff
     </property>
     <property name="text">
      <string>Admin panel</string>
-    </property>
-   </widget>
-   <widget class="QPushButton" name="btn_help">
-    <property name="geometry">
-     <rect>
-      <x>285</x>
-      <y>315</y>
-      <width>121</width>
-      <height>31</height>
-     </rect>
-    </property>
-    <property name="font">
-     <font>
-      <family>Segoe UI</family>
-      <pointsize>-1</pointsize>
-      <weight>75</weight>
-      <italic>true</italic>
-      <bold>true</bold>
-     </font>
-    </property>
-    <property name="cursor">
-     <cursorShape>PointingHandCursor</cursorShape>
-    </property>
-    <property name="styleSheet">
-     <string notr="true">QPushButton{
-background-color: #fff;
-color: #337AB7;
-border-style: solid;
-border-width: 2;
-border-color: #337AB7;
-}
-
-QPushButton:hover{
-background-color: #dfeffD;
-}
-
-QPushButton:pressed{
-background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:0, y2:1, stop:0 #fff, stop:1 #BDDDED);
-}</string>
-    </property>
-    <property name="text">
-     <string>Help</string>
     </property>
    </widget>
    <widget class="QLabel" name="label_info">

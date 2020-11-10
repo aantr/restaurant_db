@@ -5,7 +5,7 @@ from PyQt5.QtWidgets import QWidget, QGraphicsDropShadowEffect, QMessageBox, \
 
 
 class BaseWindow(QMainWindow):
-    """Base class of all window widgets, ex. ReportsWidget"""
+    """Base class of all window widgets"""
     frame: QFrame
 
     def __init__(self, app):
@@ -13,7 +13,7 @@ class BaseWindow(QMainWindow):
         self.app = app
 
     def init_ui(self):
-        self.setWindowTitle('Restaurant database')
+        self.setWindowTitle('Restaurant app')
 
         # Turn off frame
         self.setWindowFlag(Qt.FramelessWindowHint)
@@ -27,11 +27,11 @@ class BaseWindow(QMainWindow):
         # Frame move
         self.start_pos = None
 
-        # Design
         # White background on QMessageBox and QDialog
         self.setStyleSheet('QMessageBox{background: #fff;} '
                            'QDialog{background: #fff;}')
 
+    # Drag window
     def mousePressEvent(self, event):
         if event.button() == Qt.LeftButton:
             self.start_pos = event.pos()
@@ -46,15 +46,7 @@ class BaseWindow(QMainWindow):
         if event.button() == Qt.LeftButton:
             self.start_pos = None
 
+    # Back return on ESC press
     def keyPressEvent(self, event):
         if event.key() == Qt.Key_Escape:
-            self.exit()
-
-    def exit(self):
-        ans = QMessageBox.question(self, 'Question', 'Are you sure you want to exit?',
-                                   QMessageBox.Yes, QMessageBox.No)
-        if ans == QMessageBox.Yes:
-            self.close()
-
-    def get_window_transition(self):
-        return []
+            self.app.pop()

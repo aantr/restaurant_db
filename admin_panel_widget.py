@@ -16,7 +16,7 @@ class AdminPanelWidget(BaseWindow):
         super().__init__(app)
 
         self.hash_name = 'sha256'
-        self.iterations = 10 ** 6
+        self.iterations = 10 ** 5 * 5
 
         self.init_ui()
 
@@ -52,6 +52,8 @@ class AdminPanelWidget(BaseWindow):
         self.btn_logout.clicked.connect(self.logout_clicked)
         self.update_widgets_enabled()
 
+        self.btn_back.clicked.connect(self.app.pop)
+
     def check_box_changed(self, table, cb):
         def decorated(value):
             self.app.banned_for_user_table_data[cb][table] = bool(value)
@@ -64,14 +66,6 @@ class AdminPanelWidget(BaseWindow):
             for i in self.app.banned_for_user_table_data:
                 f.write(bytearray(map(int, i)))
                 f.write(b'\n')
-
-    def fill_log(self):
-        with open(self.app.LOG_ADMIN_FILENAME, 'r') as f:
-            for i in f.readlines():
-                dt = QDateTime.fromString(i.strip('\n'), date_time_format())
-                if dt.isValid():
-                    self.list_log.addItem(
-                        QListWidgetItem(dt.toString(date_time_format())))
 
     def check_password(self, password):
         with open(self.app.PASSWORD_KEY_FILENAME, 'rb') as f:
@@ -113,21 +107,20 @@ class AdminPanelWidget(BaseWindow):
         line3 = self.line_new2.text()
         self.clear_lines()
         if not self.check_password(line1):
-            QMessageBox.critical(self, 'Error',
-                                 'Incorrect current password')
+            QMessageBox.critical(self, 'Error', 'Incorrect current password')
             return
         if line2 != line3:
-            QMessageBox.critical(self, 'Error',
-                                 'New passwords don`t match')
+            QMessageBox.critical(self, 'Error', 'New passwords don`t match')
+            return
+        if self.check_password(line2):
+            QMessageBox.critical(self, 'Error', 'New and old passwords are the same')
             return
         password = line2
         if len(password) < 4:
-            QMessageBox.critical(self, 'Error',
-                                 'Length of password must be greater then 3')
+            QMessageBox.critical(self, 'Error', 'Length of password must be greater then 3')
             return
         self.apply_new_password(password)
-        QMessageBox.information(self, 'Information',
-                                'Successful changed password')
+        QMessageBox.information(self, 'Information', 'Successful changed password')
 
     def update_widgets_enabled(self):
         b = self.app.login_as_admin
@@ -141,11 +134,18 @@ class AdminPanelWidget(BaseWindow):
                   self.line_new1, self.line_new2]:
             i.setText('')
 
+    def fill_log(self):
+        self.list_log.clear()
+        with open(self.app.LOG_ADMIN_FILENAME, 'r') as f:
+            for i in f.readlines():
+                dt = QDateTime.fromString(i.strip('\n'), date_time_format())
+                if dt.isValid():
+                    self.list_log.addItem(
+                        QListWidgetItem(dt.toString(date_time_format())))
+
     def add_log(self):
         with open(self.app.LOG_ADMIN_FILENAME, 'a') as f:
             f.write(QDateTime.currentDateTime().toString(
                 date_time_format()))
             f.write('\n')
-
-    def get_window_transition(self):
-        return [(self.btn_back.clicked, self.app.get_previous_widget())]
+        self.fill_log()

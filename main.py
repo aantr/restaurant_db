@@ -1,17 +1,19 @@
 import sqlite3
 import sys
-from PyQt5.QtWidgets import QApplication, QMainWindow
+from typing import Type
 
 from base_window import BaseWindow
 from menu_widget import MenuWidget
 from table_data import DishData, IngredientData, DishTypeData, DishIngredientData, \
     CookData, WaiterData, OrderData, OrderDishData, UnitData
+from PyQt5.QtWidgets import QApplication, QMainWindow, QMessageBox
 
 
 class App(QMainWindow):
     def __init__(self):
         super().__init__()
 
+        # Constants
         self.DB_FILENAME = 'restaurant_db.sqlite'
         self.ACCESS_TABLES_FILENAME = 'admin/access.bin'
         self.PASSWORD_KEY_FILENAME = 'admin/key.bin'
@@ -30,7 +32,6 @@ class App(QMainWindow):
         select name from sqlite_master where type='table' ''').fetchall()[1:]))
         parse_lower = list(map(str.lower, table_names_parse))
         con.close()
-
         # Convert table names from TableData to CamelCase
         for i, j in enumerate(self.TABLE_DATA_CLASSES):
             if j.table_name.lower() in parse_lower:
@@ -48,29 +49,34 @@ class App(QMainWindow):
         self.stack_widgets = []
 
     def show(self):
-        self.create_new(None, MenuWidget)()
+        self._set(MenuWidget)
 
-    def create_new(self, w1: BaseWindow, w2_class):
-        def decorated():
-            w2 = w2_class(self)
-            for event, new_widget in w2.get_window_transition():
-                event.connect(self.create_new(w2, new_widget))
-            w2.show()
-            if w1:
-                w1.close()
-            self.stack_widgets.append(w2_class)
+    def _set(self, widget_class: Type[BaseWindow]):
+        widget = widget_class(self)
+        widget.show()
+        self.stack_widgets.append(widget)
 
-        return decorated
+    def push(self, widget_class: Type[BaseWindow]):
+        """Add current widget and hide previous"""
+        assert self.stack_widgets
+        self.stack_widgets[-1].hide()
+        self._set(widget_class)
 
-    def change_window(self, w1, w2_class):
-        w2 = w2_class(self)
-        w2.show()
-        if w1:
-            w1.close()
-        self.stack_widgets.append(w2_class)
+    def pop(self):
+        """Close current widget and show previous"""
+        assert self.stack_widgets
+        if len(self.stack_widgets) > 1:
+            self.stack_widgets.pop(-1).close()
 
-    def get_previous_widget(self):
-        return self.stack_widgets.pop(-1)
+            # Init and show previous showed widget
+            self.stack_widgets[-1].__init__(self)
+            self.stack_widgets[-1].show()
+        else:
+            # Exit if current widget is last in stack
+            ans = QMessageBox.question(self, 'Question', 'Are you sure you want to exit?',
+                                       QMessageBox.Yes, QMessageBox.No)
+            if ans == QMessageBox.Yes:
+                self.stack_widgets.pop(-1).close()
 
 
 if __name__ == '__main__':

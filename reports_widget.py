@@ -17,5 +17,5 @@ class ReportsWidget(BaseWindow):
         uic.loadUi('UI/reports.ui', self)
         super().init_ui()
 
-    def get_window_transition(self):
-        return [(self.btn_back.clicked, self.app.get_previous_widget())]
+        self.btn_back.clicked.connect(self.app.pop)
+
