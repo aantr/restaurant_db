@@ -47,7 +47,7 @@ class App(QMainWindow):
                 for j in i.strip(b'\n'):
                     self.banned_for_user_table_data[-1].append(bool(j))
 
-        self.login_as_admin = True
+        self.login_as_admin = False
         self.stack_widgets = []
 
     def show(self):
