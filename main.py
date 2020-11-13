@@ -2,6 +2,8 @@ import sqlite3
 import sys
 from typing import Type
 
+from PyQt5.QtCore import QDateTime
+
 from base_window import BaseWindow
 from menu_widget import MenuWidget
 from table_data import DishData, IngredientData, DishTypeData, DishIngredientData, \
@@ -45,7 +47,7 @@ class App(QMainWindow):
                 for j in i.strip(b'\n'):
                     self.banned_for_user_table_data[-1].append(bool(j))
 
-        self.login_as_admin = False
+        self.login_as_admin = True
         self.stack_widgets = []
 
     def show(self):

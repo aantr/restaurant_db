@@ -17,6 +17,10 @@ def date_time_format():
     return 'yyyy/MM/dd hh:mm'
 
 
+def time_format():
+    return 'hh:mm'
+
+
 def get_selected_rows(table: QTableWidget):
     """Returns selected rows in QTableWidget in format:
     [(3, [el1, el2, el3]),

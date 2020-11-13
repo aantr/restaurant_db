@@ -1,6 +1,10 @@
+from PyQt5.QtCore import QTime
+
 from custom_dialog import CustomDialogText, CustomDialogList, \
-    CustomDialogDateTime
+    CustomDialogDateTime, CustomDialogTime
 import sqlite3
+
+from utils import time_format
 
 
 class TableData:
@@ -164,7 +168,8 @@ class DishData(BaseTableData):
         items = self.generate_dialog_items(
             [(CustomDialogText, lambda x: x),
              (CustomDialogText, lambda x: float(x) > 0),
-             (CustomDialogList, ('dishtype', 'title'), ('dishtype', 'id'), None)],
+             (CustomDialogList, ('dishtype', 'title'), ('dishtype', 'id'), None),
+             (CustomDialogTime, None)],
             row=row)
         return items
 
@@ -220,7 +225,8 @@ class CookData(BaseTableData):
 
     def dialog_items(self, row=None):
         items = self.generate_dialog_items(
-            [(CustomDialogText, lambda x: x)],
+            [(CustomDialogText, lambda x: x),
+             (CustomDialogText, lambda x: int(x) >= 0)],
             row=row)
         return items
 
@@ -275,14 +281,46 @@ class OrderDishData(BaseTableData):
                              'dishid': ('dish', 'dish', 'title', 'id')}
 
     def update(self):
-        return super().update()
+        que = super().update()
+        que += f' order by orderclient.datetime desc, orderdish.id desc'
+        return que
+
+    def add(self, res):
+        # Add WorkMinute
+        dishcookminte = self.cur.execute(f'select cooktime from dish where id = '
+                                         f'{res[2]}').fetchone()[0]
+        dishcookminte = QTime.fromString(dishcookminte, time_format())
+        dishcookminte = dishcookminte.hour() * 60 + dishcookminte.minute() * int(res[3])
+        self.cur.execute(f'''update cook set
+                        workminute = workminute + {dishcookminte}
+                        where id = {res[1]}''')
+        return super().add(res)
 
     def dialog_items(self, row=None):
-        items = self.generate_dialog_items(
-            [(CustomDialogList, ('orderclient', 'id'), ('orderclient', 'id'), None),
-             (CustomDialogList, ('cook', 'name'), ('cook', 'id'), None),
-             (CustomDialogList, ('dish', 'title'), ('dish', 'id'), None)],
-            row=row)
+        if row is None:
+            # Auto fill Cook on Add
+            row = [None] * 5  # Count field with id
+            cook = self.cur.execute('''select name from cook where workminute=
+                                    (select min(workminute) from cook)''').fetchone()[0]
+
+            row[2] = cook  # Set default value for cook
+
+            items = self.generate_dialog_items(
+                [(CustomDialogList, ('orderclient', 'id'), ('orderclient', 'id'),
+                  None, True, False),  # Select orderclient id by date reverse and disable choice
+                 (CustomDialogList, ('cook', 'name'), ('cook', 'id'),
+                  None, False, False),  # Disable choice
+                 (CustomDialogList, ('dish', 'title'), ('dish', 'id'), None),
+                 (CustomDialogText, lambda x: int(x) > 0)],
+                row=row)
+        else:
+            # Default on Edit
+            items = self.generate_dialog_items(
+                [(CustomDialogList, ('orderclient', 'id'), ('orderclient', 'id'), None, True),
+                 (CustomDialogList, ('cook', 'name'), ('cook', 'id'), None),
+                 (CustomDialogList, ('dish', 'title'), ('dish', 'id'), None),
+                 (CustomDialogText, lambda x: int(x) > 0)],
+                row=row)
         return items
 
 

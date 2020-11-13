@@ -1,16 +1,17 @@
-from PyQt5.QtCore import Qt, QDateTime
+from PyQt5.QtCore import Qt, QDateTime, QTime
 from PyQt5.QtWidgets import QWidget, QLineEdit, QComboBox, QDialog, \
-    QPushButton, QLabel, QMessageBox, QDateTimeEdit
+    QPushButton, QLabel, QMessageBox, QDateTimeEdit, QTimeEdit
 
-from utils import date_time_format
+from utils import date_time_format, time_format
 
 
 class CustomDialogItem:
-    def __init__(self, name, widget_type, correct, default):
+    def __init__(self, name, widget_type, correct=None, enabled=True, default=None):
         self.name = name
         self.widget_type = widget_type
         self.widget: QWidget = None
         self.default = default
+        self.enabled = enabled
 
         # Function that define correct input data
         self.correct_func = correct if correct is not None else lambda x: True
@@ -18,6 +19,7 @@ class CustomDialogItem:
     def _set_widget(self, parent):
         """Setup input widget"""
         self.widget = self.widget_type(parent)
+        self.widget.setDisabled(not self.enabled)
         self.init_widget()
         self.set_default_data(self.default)
 
@@ -42,8 +44,8 @@ class CustomDialogItem:
 
 
 class CustomDialogText(CustomDialogItem):
-    def __init__(self, name, correct=None, default=None):
-        super().__init__(name, QLineEdit, correct, default)
+    def __init__(self, name, correct=None, enabled=True, default=None):
+        super().__init__(name, QLineEdit, correct, enabled, default)
 
     def get_data(self):
         return self.widget.text().strip()
@@ -55,8 +57,10 @@ class CustomDialogText(CustomDialogItem):
 
 
 class CustomDialogList(CustomDialogItem):
-    def __init__(self, name, items_list, match=None, correct=None, default=None):
-        super().__init__(name, QComboBox, correct, default)
+    def __init__(self, name, items_list, match=None, correct=None,
+                 reversed_sort=False, enabled=True, default=None):
+        super().__init__(name, QComboBox, correct, enabled, default)
+        self.reversed_sort = reversed_sort
         self.list = list(map(str, items_list))
         self.match = match
 
@@ -66,7 +70,9 @@ class CustomDialogList(CustomDialogItem):
         return self.widget.currentText()
 
     def init_widget(self):
-        self.widget.addItems(sorted(self.list))
+        all_int = all(map(str.isdigit, self.list))
+        self.widget.addItems(sorted(self.list, key=lambda x: int(x) if all_int else x,
+                                    reverse=self.reversed_sort))
 
     def set_default_data(self, data):
         if data is None:
@@ -75,8 +81,8 @@ class CustomDialogList(CustomDialogItem):
 
 
 class CustomDialogDateTime(CustomDialogItem):
-    def __init__(self, name, correct=None, default=None):
-        super().__init__(name, QDateTimeEdit, correct, default)
+    def __init__(self, name, correct=None, enabled=True, default=None):
+        super().__init__(name, QDateTimeEdit, correct, enabled, default)
         self.format = date_time_format()
 
     def init_widget(self):
@@ -92,6 +98,26 @@ class CustomDialogDateTime(CustomDialogItem):
             return
         self.widget: QDateTimeEdit
         self.widget.setDateTime(QDateTime.fromString(data, self.format))
+
+
+class CustomDialogTime(CustomDialogItem):
+    def __init__(self, name, correct=None, enabled=True, default=None):
+        super().__init__(name, QTimeEdit, correct, enabled, default)
+        self.format = time_format()
+
+    def init_widget(self):
+        self.widget.setTime(QTime.currentTime())
+        self.widget.setDisplayFormat(self.format)
+
+    def get_data(self):
+        self.widget: QTimeEdit
+        return self.widget.time().toString(self.format)
+
+    def set_default_data(self, data):
+        if data is None:
+            return
+        self.widget: QTimeEdit
+        self.widget.setTime(QTime.fromString(data, self.format))
 
 
 class CustomDialog(QDialog):

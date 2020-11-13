@@ -16,7 +16,6 @@ class EditDatabaseWidget(BaseWindow):
         self.con = sqlite3.connect(self.app.DB_FILENAME)
         self.cur = self.con.cursor()
 
-        self.table_names = [i.table_name for i in self.app.TABLE_DATA_CLASSES]
         self.tables = []
 
         self.init_ui()
@@ -25,8 +24,8 @@ class EditDatabaseWidget(BaseWindow):
         uic.loadUi('UI/edit_db.ui', self)
         super().init_ui()
 
-        for table_name, table_data_type in \
-                zip(self.table_names, self.app.TABLE_DATA_CLASSES):
+        for table_data_type in self.app.TABLE_DATA_CLASSES:
+            table_name = table_data_type.table_name
             exec(f'self.{table_name} = QTableWidget(self)')
             current_table: QTableWidget = eval(f'self.{table_name}')
 

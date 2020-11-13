@@ -4,6 +4,7 @@ from PyQt5.QtWidgets import QStyle
 
 from admin_panel_widget import AdminPanelWidget
 from base_window import BaseWindow
+from cook_panel_widget import CookPanelWidget
 from edit_db_widget import EditDatabaseWidget
 from reports_widget import ReportsWidget
 from utils import permission_denied_msg
@@ -24,6 +25,7 @@ class MenuWidget(BaseWindow):
             self.label_info.setText('Logged in as: <b>User</b>')
 
         self.btn_edit.clicked.connect(self.edit_clicked)
+        self.btn_cook.clicked.connect(self.cook_clicked)
         self.btn_reports.clicked.connect(self.reports_clicked)
         self.btn_admin.clicked.connect(self.admin_clicked)
 
@@ -31,6 +33,9 @@ class MenuWidget(BaseWindow):
 
     def edit_clicked(self):
         self.app.push(EditDatabaseWidget)
+
+    def cook_clicked(self):
+        self.app.push(CookPanelWidget)
 
     def reports_clicked(self):
         if self.app.login_as_admin:
