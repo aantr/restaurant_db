@@ -18,4 +18,3 @@ class ReportsWidget(BaseWindow):
         super().init_ui()
 
         self.btn_back.clicked.connect(self.app.pop)
-
